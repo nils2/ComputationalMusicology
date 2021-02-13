@@ -14,19 +14,19 @@ However there might not be a big change at all. Since they have only been active
 
 "Thunder", "Shotgun", "Till It Hurts", "Amsterdamned", "In My Room" and "DJ Turn It Up" are very typical songs. These are very typical as they define their past and current style in beat and beatdrop. Whereas "Assets", "P*\$\$YRICH", "Wild Mustang", "Villain", "Another Life" and "Kiss Your Lips" are atypical songs. The last one is very strange as it is happy hardcore, a genre that does not suit Yellow Claw's style, the same could be said for the other atypical songs.
 
-## Load Data
-```{r}
+```{r Load packages, echo=FALSE}
 library(tidyverse)
 library(spotifyr)
 library(remotes)
 library(usethis)
 ```
 
-```{r Load Playlist}
+```{r Load Playlist, echo=FALSE}
 YCData <- get_playlist_audio_features("", "4ihYAvvARSvL4yUzdibPrd")
+
 ```
 
-```{r Data summary}
+```{r Data summary, echo=FALSE}
 YCSum <-
   YCData %>%
     summarise(
@@ -46,17 +46,80 @@ YCSum <-
 ```
 
 
-```{r Change Data}
+```{r Change Data, echo=FALSE}
 year <- YCData %>% pull(track.album.release_date)
 year <- substr(year, 1, 4)
 YCData$year <- year
+rm(year)
+
+MD <- YCData %>% mutate(year,
+               MadDecent = ifelse(year < 2013, "Before", "During"),
+               MadDecent = ifelse(year < 2018, MadDecent, "After"))
+YCData <- MD
+rm(MD)
+
+Lab <- YCData %>% mutate(year,
+               Label = ifelse(track.album.name %in% c("Blood For Mercy", 
+                                  "Amsterdam Twerk Music", "Los Amsterdam",
+                                  "Amsterdam Trap Music", "Amsterdam Trap Music, Vol. 2"),
+                                  "MadDecent", "Single"),
+               Label = ifelse(track.album.name %in% c("New Blood", "Never Dies", 
+                                                      "Eastzane Warriors", "Danger Days",
+                                                      "Amsterdam Trap Music, Vol. 3"), 
+                              "Barong Family", Label))
+YCData <- Lab
+rm(Lab)
+
+Lab2 <- YCData %>% mutate(year,
+               Albums = ifelse(track.album.name %in% c("Blood For Mercy", 
+                                  "Amsterdam Twerk Music", "Los Amsterdam",
+                                  "Amsterdam Trap Music", "Amsterdam Trap Music, Vol. 2",
+                                  "New Blood", "Never Dies", 
+                                  "Eastzane Warriors", "Danger Days",
+                                    "Amsterdam Trap Music, Vol. 3"),
+                                  track.album.name, "Single"))
+YCData <- Lab2
+rm(Lab2)
+
+Biz <- YCData %>% mutate(year,
+               Bizzey = ifelse(year < 2016, "With", "Without"))
+YCData <- Biz
+rm(Biz)
 ```
 
 ## First Plot
+This plot shows the difference in speechiness in the time Bizzey was and wasn't part of the group.
 
-```{r First Plot}
-p1 <- YCData %>% ggplot(aes(year, energy, color = loudness, size = tempo)) + geom_jitter()
+
+```{r First Plot, echo=FALSE}
+p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label)) + 
+                      geom_point(position = position_jitter()) +
+                      scale_y_log10() +
+                      scale_color_manual(values = c("#FFCA00", "#56B4E9", "#999999")) +
+                      facet_wrap(~Bizzey, scales = "free_x") +
+                      stat_summary(aes(y = speechiness,group=1), fun=mean, color="red", geom="line",group=1) +
+                      theme_light() +
+                      theme(legend.position = c(0.11, 0.8)) +
+                      labs(title = "The change of Bizzeys departure", x = "Year", y = "Speechiness")
 
 p1
 ```
+```{r echo=FALSE}
+# Possible interesting comparisons
+# year/instrumentalness
+# energy/loudness
+# energy/speechiness
+# energy/instrumentalness
+# speechiness/loudness
+# acousticness/loudness
+```
 
+```{r echo=FALSE}
+
+p3 <- ggplot(data = YCData %>%
+               arrange(energy) %>%
+              slice(1:5, (n()-4):n()),
+             aes(x = energy, y = track.name, color = Label, shape = MadDecent)) +
+            geom_point(size = 4) +
+            geom_segment(aes(xend = 0, yend = track.name), size = 2)
+```
