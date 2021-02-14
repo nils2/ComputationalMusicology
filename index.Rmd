@@ -88,7 +88,7 @@ rm(Biz)
 ```
 
 ## First Plot
-This plot shows the difference in speechiness and liveness in the time Bizzey was and wasn't part of the group.
+This plot shows the difference in speechiness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would expect the departure of a MC to decrease the speechiness of produced songs, but this is not the case here.
 
 
 ```{r First Plot, echo=FALSE}
