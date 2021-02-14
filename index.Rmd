@@ -88,19 +88,21 @@ rm(Biz)
 ```
 
 ## First Plot
-This plot shows the difference in speechiness in the time Bizzey was and wasn't part of the group.
+This plot shows the difference in speechiness and liveness in the time Bizzey was and wasn't part of the group.
 
 
 ```{r First Plot, echo=FALSE}
-p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label)) + 
+p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness)) + 
                       geom_point(position = position_jitter()) +
                       scale_y_log10() +
+                      geom_rug(size = 0.2, sides = "l") +      # Add 'fringes' to show data distribution.
                       scale_color_manual(values = c("#FFCA00", "#56B4E9", "#999999")) +
                       facet_wrap(~Bizzey, scales = "free_x") +
                       stat_summary(aes(y = speechiness,group=1), fun=mean, color="red", geom="line",group=1) +
                       theme_light() +
                       theme(legend.position = c(0.11, 0.8)) +
-                      labs(title = "The change of Bizzey's departure", x = "Year", y = "Speechiness")
+                      labs(title = "The change of Bizzey's departure", x = "Year", y = "Speechiness") +
+                      guides(size = FALSE)
 
 p1
 ```
