@@ -14,7 +14,7 @@ However there might not be a big change at all. Since they have only been active
 
 "Thunder", "Shotgun", "Till It Hurts", "Amsterdamned", "In My Room" and "DJ Turn It Up" are very typical songs. These are very typical as they define their past and current style in beat and beatdrop. Whereas "Assets", "P*\$\$YRICH", "Wild Mustang", "Villain", "Another Life" and "Kiss Your Lips" are atypical songs. The last one is very strange as it is happy hardcore, a genre that does not suit Yellow Claw's style, the same could be said for the other atypical songs.
 
-```{r Load packages, echo=FALSE}
+```{r Load packages, message=FALSE, echo=FALSE}
 library(tidyverse)
 library(spotifyr)
 library(remotes)
@@ -23,7 +23,6 @@ library(usethis)
 
 ```{r Load Playlist, echo=FALSE}
 YCData <- get_playlist_audio_features("", "4ihYAvvARSvL4yUzdibPrd")
-
 ```
 
 ```{r Data summary, echo=FALSE}
