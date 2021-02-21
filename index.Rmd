@@ -2,13 +2,44 @@
 title: "Yellow Claw's Evolutionary Analysis"
 author: "Nils Peters - 11642335"
 date: "Spring 2021"
-output: html_document
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
 ---
-# Computational Musicology
 
-Did Yellow Claw evolve over the years? This question will be researched by using a selfmade chronological playlist of all their songs listed in their spotify page (except remixes). Yellow Claw has and probably will be one of my favourites. So comparing their progress over the years to try and find if there are any differences seemed like a logical conclusion. It is interessting because they are not the most famous Dutch DJ, but amongst peers they are known for having very nogstalgic and good songs.
 
-Personally I expect they changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the Mad Decent, which is Diplo's recordlabel. I suspect they learned a lot under Diplo's supervision, though I am unsure as to how they changed specifically. Maybe they added more BPM, changed timbres or they completely renewed themselfs.
+<style>
+.sbframe-content {
+  line-height: 1.6;
+  font-size: 16px;
+}
+.sbframe-commentary {
+  line-height: 1.6;
+  font-size: 16px;
+}
+.navbar {
+  color: black;
+}
+.navbar-fixed-top {
+  background-color: gray;
+}
+#dashboard-container li {
+  background-color: yellow;
+  text-align: center;
+  line-height: 800%;
+}
+#dashboard-container li.active {
+  background-image: url("https://i1.sndcdn.com/avatars-000739128925-0ottgs-t500x500.jpg");
+  background-size: 270px 120px;
+  text-align: center;
+}
+</style>
+
+### Did Yellow Claw evolve over the years?
+
+This question will be researched by using a selfmade chronological playlist of all their songs listed in their spotify page (except remixes). [Yellow Claw](https://yellowclaw.com/) has and probably will be one of my favorites. So comparing their progress over the years to try and find if there are any differences seemed like a logical conclusion. It is interesting because they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs.
+
+Personally I expect they changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the Mad Decent, which is Diplo's recordlabel. I suspect they learned a lot under Diplo's supervision, though I am unsure as to how they changed specifically. Maybe they added more BPM, changed timbres or they completely renewed themselves.
 
 However there might not be a big change at all. Since they have only been active for 10 years of which they spend only 8 producing their own songs. This might barely be enough or fall just short of enough time, especially since the 2021 songs are rather different than the others before. 
 
@@ -19,6 +50,10 @@ library(tidyverse)
 library(spotifyr)
 library(remotes)
 library(usethis)
+library(plotly) # download Cairo
+library(compmus)
+library(DT)
+library(forcats)
 ```
 
 ```{r Load Playlist, echo=FALSE}
@@ -86,24 +121,36 @@ YCData <- Biz
 rm(Biz)
 ```
 
-## First Plot
-This plot shows the difference in speechiness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would expect the departure of a MC to decrease the speechiness of produced songs, but this is not the case here.
+### This is Yellow Claw
 
+```{r}
+playlistYC <- YCData %>% select(track.name, track.album.release_date)
+                
+datatable(playlistYC, rownames = FALSE, class = "table1",
+          colnames = c('Name', 'Release date'), 
+          options = list(scrollY = "500px", pageLength = 120, paging = FALSE))
+```
+
+
+
+### To Bizzey or not to Bizzey?
 
 ```{r First Plot, echo=FALSE}
-p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness)) + 
-                      geom_point(position = position_jitter()) +
+p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness, 
+                      text = paste("Name:", track.name, "\n", "Label:", Label, "\n",
+                                  "Speechiness:", speechiness, "\n",
+                                  "Liveness:", liveness))) + 
+                      geom_point(position = position_jitter(), aes(alpha = 0.8)) +
                       scale_y_log10() +
                       geom_rug(size = 0.2, sides = "l") +      # Add 'fringes' to show data distribution.
                       scale_color_manual(values = c("#FFCA00", "#56B4E9", "#999999")) +
                       facet_wrap(~Bizzey, scales = "free_x") +
-                      stat_summary(aes(y = speechiness,group=1), fun=mean, color="red", geom="line",group=1) +
                       theme_light() +
                       theme(legend.position = c(0.11, 0.8)) +
                       labs(title = "The change of Bizzey's departure", x = "Year", y = "Speechiness") +
-                      guides(size = FALSE)
+                      guides(size = FALSE, alpha = FALSE)
 
-p1
+ggplotly(p1, tooltip = "text")
 ```
 ```{r echo=FALSE}
 # Possible interesting comparisons
@@ -124,3 +171,15 @@ p3 <- ggplot(data = YCData %>%
             geom_point(size = 4) +
             geom_segment(aes(xend = 0, yend = track.name), size = 2)
 ```
+
+***
+
+This plot shows the difference in speechiness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would expect the departure of a MC to decrease the speechiness of produced songs, but this is not the case here.
+
+### Looking at ...
+
+
+
+### The answer
+
+Staggeringly they hardly changed. 
