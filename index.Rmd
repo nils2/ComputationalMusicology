@@ -24,7 +24,7 @@ output:
   background-color: gray;
 }
 #dashboard-container li {
-  background-color: yellow;
+  background-color: #ffff00;
   text-align: center;
   line-height: 800%;
 }
@@ -50,7 +50,7 @@ library(tidyverse)
 library(spotifyr)
 library(remotes)
 library(usethis)
-library(plotly) # download Cairo
+library(plotly)
 library(compmus)
 library(DT)
 library(forcats)
@@ -133,7 +133,7 @@ datatable(playlistYC, rownames = FALSE, class = "table1",
 
 
 
-### To Bizzey or not to Bizzey?
+### To Bizzey or not to Bizzey? A-side
 
 ```{r First Plot, echo=FALSE}
 p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness, 
@@ -146,12 +146,26 @@ p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness,
                       scale_color_manual(values = c("#FFCA00", "#56B4E9", "#999999")) +
                       facet_wrap(~Bizzey, scales = "free_x") +
                       theme_light() +
-                      theme(legend.position = c(0.11, 0.8)) +
-                      labs(title = "The change of Bizzey's departure", x = "Year", y = "Speechiness") +
+                      labs(x = "Year", y = "Speechiness",
+                           title = "The change of Bizzey's departure",
+                           subtitle = "In Speechiness and Liveness vs Years <br>") +
                       guides(size = FALSE, alpha = FALSE)
 
-ggplotly(p1, tooltip = "text")
+ggplotly(p1, tooltip = "text") %>%
+  layout(title = list(text = paste("The change of Bizzey's departure",
+                                    "<br>",
+                                    "<sup>",
+                                    "In Speechiness and Liveness vs Years",
+                                    "</sup>")),
+          margin = list(t = 100))
 ```
+
+***
+
+This plot shows the difference in speechiness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would expect the departure of a MC to decrease the speechiness of produced songs, but this is not the case here.
+
+### To Bizzey or not to Bizzey? B-side
+
 ```{r echo=FALSE}
 # Possible interesting comparisons
 # year/instrumentalness
@@ -160,26 +174,78 @@ ggplotly(p1, tooltip = "text")
 # energy/instrumentalness
 # speechiness/loudness
 # acousticness/loudness
-```
 
-```{r echo=FALSE}
+p2 <- YCData %>% ggplot(aes(year, acousticness, color = Label, size = liveness, 
+                      text = paste("Name:", track.name, "\n", "Label:", Label, "\n",
+                                  "Acousticness:", acousticness, "\n",
+                                  "Liveness:", liveness))) + 
+                      geom_point(position = position_jitter(), aes(alpha = 0.8)) +
+                      scale_y_log10() +
+                      geom_rug(size = 0.2, sides = "l") +      # Add 'fringes' to show data distribution.
+                      scale_color_manual(values = c("#FFCA00", "#56B4E9", "#999999")) +
+                      facet_wrap(~Bizzey, scales = "free_x") +
+                      theme_light() +
+                      labs(x = "Year", y = "Acousticness",
+                           title = "The change of Bizzey's departure", 
+                           subtitle = "In Acousticness and Liveness vs Years") +
+                      guides(size = FALSE, alpha = FALSE)
 
-p3 <- ggplot(data = YCData %>%
-               arrange(energy) %>%
-              slice(1:5, (n()-4):n()),
-             aes(x = energy, y = track.name, color = Label, shape = MadDecent)) +
-            geom_point(size = 4) +
-            geom_segment(aes(xend = 0, yend = track.name), size = 2)
+ggplotly(p2, tooltip = "text") %>%
+  layout(title = list(text = paste("The change of Bizzey's departure",
+                                    "<br>",
+                                    "<sup>",
+                                    "In Acousticness and Liveness vs Years",
+                                    "</sup>")),
+          margin = list(t = 100))
 ```
 
 ***
 
-This plot shows the difference in speechiness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would expect the departure of a MC to decrease the speechiness of produced songs, but this is not the case here.
+This plot shows the difference in acousticness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the acousticness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the acousticness since Bizzey was a MC. You would expect the departure of a MC to decrease the acousticness of produced songs, but this is not the case here.
 
-### Looking at ...
+```{r echo=FALSE}
+
+#p3 <- ggplot(data = YCData %>%
+#               arrange(energy) %>%
+#             slice(1:5, (n()-4):n()),
+#             aes(x = energy, y = track.name, color = Label, shape = MadDecent)) +
+#            geom_point(size = 4) +
+#            geom_segment(aes(xend = 0, yend = track.name), size = 2)
+```
+
+### Looking at the Loudest MF
+
+```{r}
+LMF <-
+  get_tidy_audio_analysis("34xsvZ1A2Ou1oo1VyOwQG1") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+```
+
+```{r}
+LMF %>%
+  mutate(pitches = map(pitches, compmus_normalise, "chebyshev")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Chromagram Loudest MF") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
 
 
+***
+
+Here we can see the chromagram of Loudest MF, which scored very high on speechiness.
 
 ### The answer
 
-Staggeringly they hardly changed. 
+They slightly changed after Bizzey left. But the change in difference is significant enough to be left to chance and thus they changed. 
