@@ -244,7 +244,12 @@ LMF %>%
 
 ***
 
-Here we can see the chromagram of Loudest MF, which scored very high on speechiness.
+Here we can see the chromagram of [Loudest MF](https://open.spotify.com/track/34xsvZ1A2Ou1oo1VyOwQG1?si=5xdFXOTaSeWKOmF3pZgbwg), which scored very high on speechiness.
+
+You can see the fade away of sound between 28 and 36 sec as only G# is present which is the muffled tone.
+After this it is clear that there is a distinct beat since it is visible in A/Ab and E/Eb and slightly in C#/C. This until around 50 sec where the rapper starts and the spectrum contains more yellow and thus there are more fequencies present until around 65 sec.
+You can see and hear at 85 sec the second beat drop, with a lot of clean notes being played until 115 sec. Also you can see at 105 sec is where the rapper says 'bounce' a couple of times as the C# is faded in the C. 
+Then the rapper starts again as visible in the amount of present frequencies. At 155 sec the third beat starts decently clean as most is present in G# but around 160 seconds muffled sound is added to the beat and the beat gets more components from then on. However it is still clear that the music fluctuates between high and low. 
 
 ### The answer
 
