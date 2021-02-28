@@ -35,16 +35,6 @@ output:
 }
 </style>
 
-### Did Yellow Claw evolve over the years?
-
-This question will be researched by using a selfmade chronological playlist of all their songs listed in their spotify page (except remixes). [Yellow Claw](https://yellowclaw.com/) has and probably will be one of my favorites. So comparing their progress over the years to try and find if there are any differences seemed like a logical conclusion. It is interesting because they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs.
-
-Personally I expect they changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the Mad Decent, which is Diplo's recordlabel. I suspect they learned a lot under Diplo's supervision, though I am unsure as to how they changed specifically. Maybe they added more BPM, changed timbres or they completely renewed themselves.
-
-However there might not be a big change at all. Since they have only been active for 10 years of which they spend only 8 producing their own songs. This might barely be enough or fall just short of enough time, especially since the 2021 songs are rather different than the others before. 
-
-"Thunder", "Shotgun", "Till It Hurts", "Amsterdamned", "In My Room" and "DJ Turn It Up" are very typical songs. These are very typical as they define their past and current style in beat and beatdrop. Whereas "Assets", "P*\$\$YRICH", "Wild Mustang", "Villain", "Another Life" and "Kiss Your Lips" are atypical songs. The last one is very strange as it is happy hardcore, a genre that does not suit Yellow Claw's style, the same could be said for the other atypical songs.
-
 ```{r Load packages, message=FALSE, echo=FALSE}
 library(tidyverse)
 library(spotifyr)
@@ -54,6 +44,7 @@ library(plotly)
 library(compmus)
 library(DT)
 library(forcats)
+library(purrr)
 ```
 
 ```{r Load Playlist, echo=FALSE}
@@ -121,7 +112,130 @@ YCData <- Biz
 rm(Biz)
 ```
 
+### A closer look at Loudest MF
+```{r}
+bzt <-
+  get_tidy_audio_analysis("34xsvZ1A2Ou1oo1VyOwQG1") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+```
+
+```{r}
+bind_rows(
+  bzt %>%
+    compmus_self_similarity(pitches, "manhattan") %>%
+    mutate(d = d / max(d), type = "Chroma"),
+  bzt %>%
+    compmus_self_similarity(timbre, "euclidean") %>%
+    mutate(d = d / max(d), type = "Timbre")
+) %>%
+  mutate() %>%
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")
+
+```
+
+***
+
+All the points talked about previously in Looking at the Loudest MF are clearly visible in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was no repetition found by spotify. 
+
+### A closer look at DJ turn it up
+```{r}
+bzt2 <-
+  get_tidy_audio_analysis("1ivuWgxFQb2xzxVNSlB1hF") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+```
+
+```{r}
+bind_rows(
+  bzt2 %>%
+    compmus_self_similarity(pitches, "manhattan") %>%
+    mutate(d = d / max(d), type = "Chroma"),
+  bzt2 %>%
+    compmus_self_similarity(timbre, "euclidean") %>%
+    mutate(d = d / max(d), type = "Timbre")
+) %>%
+  mutate() %>%
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")
+
+```
+
+***
+
+From the timbre-based self-similarity matrices a pattern of the song becomes clear. It is visible that from 20 sec to 95 sec in the song the same occurs as from 95 sec to 160 sec. This coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
+
+
+### Did Yellow Claw evolve over the years?
+
+This question will be researched by using a selfmade chronological playlist of all their songs listed in their spotify page (except remixes). [Yellow Claw](https://yellowclaw.com/) has and probably will be one of my favorites. So comparing their progress over the years to try and find if there are any differences seemed like a logical conclusion. It is interesting because they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs.
+
+Personally I expect they changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the Mad Decent, which is Diplo's recordlabel. I suspect they learned a lot under Diplo's supervision, though I am unsure as to how they changed specifically. Maybe they added more BPM, changed timbres or they completely renewed themselves.
+
+However there might not be a big change at all. Since they have only been active for 10 years of which they spend only 8 producing their own songs. This might barely be enough or fall just short of enough time, especially since the 2021 songs are rather different than the others before. 
+
+"Thunder", "Shotgun", "Till It Hurts", "Amsterdamned", "In My Room" and "DJ Turn It Up" are very typical songs. These are very typical as they define their past and current style in beat and beatdrop. Whereas "Assets", "P*\$\$YRICH", "Wild Mustang", "Villain", "Another Life" and "Kiss Your Lips" are atypical songs. The last one is very strange as it is happy hardcore, a genre that does not suit Yellow Claw's style, the same could be said for the other atypical songs.
+
 ### This is Yellow Claw
+
+[The playlist:](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw)
 
 ```{r}
 playlistYC <- YCData %>% select(track.name, track.album.release_date)
@@ -130,8 +244,6 @@ datatable(playlistYC, rownames = FALSE, class = "table1",
           colnames = c('Name', 'Release date'), 
           options = list(scrollY = "500px", pageLength = 120, paging = FALSE))
 ```
-
-
 
 ### To Bizzey or not to Bizzey? A-side
 
@@ -252,5 +364,3 @@ You can see and hear at 85 sec the second beat drop, with a lot of clean notes b
 Then the rapper starts again as visible in the amount of present frequencies. At 155 sec the third beat starts decently clean as most is present in G# but around 160 seconds muffled sound is added to the beat and the beat gets more components from then on. However it is still clear that the music fluctuates between high and low. 
 
 ### The answer
-
-They slightly changed after Bizzey left. But the change in difference is significant enough to be left to chance and thus they changed. 
