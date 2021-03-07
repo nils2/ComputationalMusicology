@@ -21,14 +21,14 @@ output:
   color: black;
 }
 .navbar-fixed-top {
-  background-color: gray;
+  background-color: #7C7B78FF;
 }
-#dashboard-container li {
-  background-color: #ffff00;
+#dashboard-container .storyboard-nav .sbframelist li {
+  background-color: #FFEC00;
   text-align: center;
   line-height: 800%;
 }
-#dashboard-container li.active {
+#dashboard-container .storyboard-nav .sbframelist li.active {
   background-image: url("https://i1.sndcdn.com/avatars-000739128925-0ottgs-t500x500.jpg");
   background-size: 270px 120px;
   text-align: center;
@@ -76,6 +76,10 @@ year <- YCData %>% pull(track.album.release_date)
 year <- substr(year, 1, 4)
 YCData$year <- year
 rm(year)
+month <- YCData %>% pull(track.album.release_date)
+month <- substr(month, 4, 6)
+YCData$month <- month
+rm(month)
 
 MD <- YCData %>% mutate(year,
                MadDecent = ifelse(year < 2013, "Before", "During"),
@@ -107,12 +111,371 @@ YCData <- Lab2
 rm(Lab2)
 
 Biz <- YCData %>% mutate(year,
-               Bizzey = ifelse(year < 2016, "With", "Without"))
+               Bizzey = ifelse(year < 2016 | (year == 2016 & month < 05), "With", "Without"))
 YCData <- Biz
 rm(Biz)
 ```
 
-### A closer look at Loudest MF
+```{r, echo=FALSE}
+circshift <- function(v, n) {
+  if (n == 0) v else c(tail(v, n), head(v, -n))
+}
+
+#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+```
+
+```{r}
+circshift <- function(v, n) {
+  if (n == 0) v else c(tail(v, n), head(v, -n))
+}
+
+#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+major_key <-
+  c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88)
+minor_key <-
+  c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+
+key_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:maj", circshift(major_key, 6),
+    "Bb:min", circshift(minor_key, 10),
+    "Db:maj", circshift(major_key, 1),
+    "F:min", circshift(minor_key, 5),
+    "Ab:maj", circshift(major_key, 8),
+    "C:min", circshift(minor_key, 0),
+    "Eb:maj", circshift(major_key, 3),
+    "G:min", circshift(minor_key, 7),
+    "Bb:maj", circshift(major_key, 10),
+    "D:min", circshift(minor_key, 2),
+    "F:maj", circshift(major_key, 5),
+    "A:min", circshift(minor_key, 9),
+    "C:maj", circshift(major_key, 0),
+    "E:min", circshift(minor_key, 4),
+    "G:maj", circshift(major_key, 7),
+    "B:min", circshift(minor_key, 11),
+    "D:maj", circshift(major_key, 2),
+    "F#:min", circshift(minor_key, 6),
+    "A:maj", circshift(major_key, 9),
+    "C#:min", circshift(minor_key, 1),
+    "E:maj", circshift(major_key, 4),
+    "G#:min", circshift(minor_key, 8),
+    "B:maj", circshift(major_key, 11),
+    "D#:min", circshift(minor_key, 3)
+  )
+```
+
+### *NEW*  Shift in Loudness
+
+```{r}
+befor <-
+  YCData %>%
+  filter(YCData$Bizzey == "With") %>%
+  add_audio_analysis()
+after <-
+  YCData %>%
+  filter(YCData$Bizzey == "Without") %>%
+  add_audio_analysis()
+diffBA <-
+  befor %>%
+  mutate(genre = "With") %>%
+  bind_rows(after %>% mutate(genre = "Without"))
+```
+
+```{r}
+diffBA %>%
+  mutate(
+    timbre =
+      map(
+        segments,
+        compmus_summarise,
+        timbre,
+        method = "mean"
+      )
+  ) %>%
+  select(genre, timbre) %>%
+  compmus_gather_timbre() %>%
+  ggplot(aes(x = basis, y = value, fill = genre)) +
+  geom_violin() +
+  scale_fill_viridis_d() +
+  scale_fill_manual(values=c("#7C7B78FF", "#FFEC00")) +
+  theme_light() +
+  labs(x = "Spotify Timbre Coefficients", y = "", fill = "Bizzey")
+```
+
+
+***
+
+### *NEW*  Key and chords
+
+```{r}
+
+```
+
+
+***
+
+
+### Yellow *M^ther Facking* Claw
+
+[Yellow Claw](https://yellowclaw.com/) has and probably will keep being one of my favorite DJ's. Interestingly enough they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs. It started with three members named Bizzey, Jim Aasgier en Nizzle in 2010. Only Bizzey had experience previous to joining the group, as he released 2 songs under his name in 2006. Since I stuck with the group for so long it was only logical to analyze them. **Did Yellow Claw evolve over time?** Is a very interesting question as a few things happend over the years to the group. To research the question a self-made chronological playlist of all the songs listed in the Spotify page (except remixes) will be used. 
+
+Personally I expect they changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the Mad Decent, which is Diplo's recordlabel. However most likely the biggest change occurred in 2016 when Bizzey left the group to spend more time with his family. His main job was the MC, or master of ceremonies, which is used as an alternative indication for rappers or performing artists.
+
+However there might not be a big change at all. Since they have only been active for 11 years of which they spend only 9 producing their own songs and half was spend with and the other without Bizzey. This might barely be enough or fall short of enough time, especially since the 2021 songs are rather different than the others before. 
+
+**Typical tracks:**
+
+* Thunder
+* Shotgun
+    + Most popular youtube video with 186 million views.
+* Till It Hurts
+* Amsterdamned
+* In My Room
+* DJ Turn It Up
+    + Most popular spotify song with 167 million plays. 
+
+These are very typical as they define their past and current style in beat and beatdrop.
+
+**Atypical tracks:**
+    
+* Assets
+* P*\$\$YRICH
+* Wild Mustang
+* Villain
+* Another Life
+* Kiss Your Lips
+    + This one is very strange as it is happy hardcore, a genre that does not suit Yellow Claw's style nor do they have any similar songs.
+  
+These are all tracks with a very different style then the other tracks made by Yellow Claw. 
+
+### This is Yellow Claw
+
+[The playlist:](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw)
+
+```{r}
+playlistYC <- YCData %>% select(track.name, track.album.release_date)
+                
+datatable(playlistYC, rownames = FALSE, class = "table1",
+          colnames = c('Name', 'Release date'), 
+          options = list(scrollY = "490px", pageLength = 120, paging = FALSE))
+```
+
+### To Bizzey or not to Bizzey? *A-side*
+
+```{r First Plot, echo=FALSE}
+p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness, 
+                      text = paste("Name:", track.name, "\n", "Label:", Label, "\n",
+                                  "Speechiness:", speechiness, "\n",
+                                  "Liveness:", liveness))) + 
+                      geom_point(position = position_jitter(), aes(alpha = 0.8)) +
+                      scale_y_log10() +
+                      geom_rug(size = 0.2, sides = "l") +      # Add 'fringes' to show data distribution.
+                      scale_color_manual(values = c("#00204DFF", "#7C7B78FF", "#FFBC00")) +
+                      facet_wrap(~Bizzey, scales = "free_x") +
+                      theme_light() +
+                      theme(strip.background = element_rect(fill="#7C7B78FF")) +
+                      labs(x = "Year", y = "Speechiness",
+                           title = "The change of Bizzey's departure",
+                           subtitle = "In Speechiness and Liveness vs Years <br>") +
+                      guides(size = FALSE, alpha = FALSE)
+
+ggplotly(p1, tooltip = "text") %>%
+  layout(title = list(text = paste("The change of Bizzey's departure",
+                                    "<br>",
+                                    "<sup>",
+                                    "In Speechiness and Liveness vs Years",
+                                    "</sup>")),
+          margin = list(t = 100))
+```
+
+***
+
+This plot shows the **difference in speechiness and liveness** in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would **expect the departure of a MC to decrease the speechiness** of produced songs, but this is **not the case** here. One would expect it because rap music is indicated by Spotify to have a speechiness between 0.33 and 0.66. While values above 0.66 are indicated to describe tracks that are probably made entirely of spoken words, and values below 0.33 most likely represent music and other non-speech-like tracks. Therefore the low values are suprizing altogether but an MC, or rapper, leaving leading to an increase in the mean is at least to be called peculiar. One can also note an **increase in liveness** in songs after Bizzey left, whilst none of the songs are life performances. Eventhough none of the songs pass the 0.8 barrier set by Spotify to qualify as a live recording, but it can indicate a change to the music. This since clearly the algorithm notices something different to indicate the higher liveness.
+
+### To Bizzey or not to Bizzey? *B-side*
+
+```{r echo=FALSE}
+# Possible interesting comparisons
+# year/instrumentalness
+# energy/loudness
+# energy/speechiness
+# energy/instrumentalness
+# speechiness/loudness
+# acousticness/loudness
+
+p2 <- YCData %>% ggplot(aes(year, acousticness, color = Label, size = liveness, 
+                      text = paste("Name:", track.name, "\n", "Label:", Label, "\n",
+                                  "Acousticness:", acousticness, "\n",
+                                  "Liveness:", liveness))) + 
+                      geom_point(position = position_jitter(), aes(alpha = 0.8)) +
+                      scale_y_log10() +
+                      geom_rug(size = 0.2, sides = "l") +      # Add 'fringes' to show data distribution.
+                      scale_color_manual(values = c("#00204DFF", "#7C7B78FF", "#FFBC00")) +
+                      facet_wrap(~Bizzey, scales = "free_x") +
+                      theme_light() +
+                      theme(strip.background = element_rect(fill="#7C7B78FF")) +
+                      labs(x = "Year", y = "Acousticness",
+                           title = "The change of Bizzey's departure", 
+                           subtitle = "In Acousticness and Liveness vs Years") +
+                      guides(size = FALSE, alpha = FALSE)
+
+ggplotly(p2, tooltip = "text") %>%
+  layout(title = list(text = paste("The change of Bizzey's departure",
+                                    "<br>",
+                                    "<sup>",
+                                    "In Acousticness and Liveness vs Years",
+                                    "</sup>")),
+          margin = list(t = 100))
+```
+
+***
+
+This plot shows the difference in acousticness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the acousticness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the acousticness since Bizzey was a MC. You would expect the departure of a MC to decrease the acousticness of produced songs, but this is not the case here.
+
+```{r echo=FALSE}
+
+#p3 <- ggplot(data = YCData %>%
+#               arrange(energy) %>%
+#             slice(1:5, (n()-4):n()),
+#             aes(x = energy, y = track.name, color = Label, shape = MadDecent)) +
+#            geom_point(size = 4) +
+#            geom_segment(aes(xend = 0, yend = track.name), size = 2)
+```
+
+### Looking at the *Loudest MF*
+
+```{r}
+LMF <-
+  get_tidy_audio_analysis("34xsvZ1A2Ou1oo1VyOwQG1") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+```
+
+```{r}
+LMF %>%
+  mutate(pitches = map(pitches, compmus_normalise, "chebyshev")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Chromagram Loudest MF") +
+  theme_minimal() +
+  scale_fill_viridis_c(option = 'E')
+```
+
+
+***
+
+Here we can see the chromagram of [Loudest MF](https://open.spotify.com/track/34xsvZ1A2Ou1oo1VyOwQG1?si=5xdFXOTaSeWKOmF3pZgbwg), which scored very high on speechiness.
+
+You can see the fade away of sound between 28 and 36 sec as only G# is present which is the muffled tone.
+After this it is clear that there is a distinct beat since it is visible in A/Ab and E/Eb and slightly in C#/C. This until around 50 sec where the rapper starts and the spectrum contains more yellow and thus there are more fequencies present until around 65 sec.
+You can see and hear at 85 sec the second beat drop, with a lot of clean notes being played until 115 sec. Also you can see at 105 sec is where the rapper says 'bounce' a couple of times as the C# is faded in the C. 
+Then the rapper starts again as visible in the amount of present frequencies. At 155 sec the third beat starts decently clean as most is present in G# but around 160 seconds muffled sound is added to the beat and the beat gets more components from then on. However it is still clear that the music fluctuates between high and low. 
+
+
+### A closer look at *Loudest MF*
 ```{r}
 bzt <-
   get_tidy_audio_analysis("34xsvZ1A2Ou1oo1VyOwQG1") %>% # Change URI.
@@ -157,7 +520,7 @@ bind_rows(
   geom_tile() +
   coord_fixed() +
   facet_wrap(~type) +
-  scale_fill_viridis_c(guide = "none") +
+  scale_fill_viridis_c(option = 'E', guide = "none") +
   theme_classic() +
   labs(x = "", y = "")
 
@@ -167,7 +530,7 @@ bind_rows(
 
 All the points talked about previously in Looking at the Loudest MF are clearly visible in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was no repetition found by spotify. 
 
-### A closer look at DJ turn it up
+### A closer look at *DJ turn it up*
 ```{r}
 bzt2 <-
   get_tidy_audio_analysis("1ivuWgxFQb2xzxVNSlB1hF") %>% # Change URI.
@@ -212,7 +575,7 @@ bind_rows(
   geom_tile() +
   coord_fixed() +
   facet_wrap(~type) +
-  scale_fill_viridis_c(guide = "none") +
+  scale_fill_viridis_c(option = 'E', guide = "none") +
   theme_classic() +
   labs(x = "", y = "")
 
@@ -223,144 +586,7 @@ bind_rows(
 From the timbre-based self-similarity matrices a pattern of the song becomes clear. It is visible that from 20 sec to 95 sec in the song the same occurs as from 95 sec to 160 sec. This coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
 
-### Did Yellow Claw evolve over the years?
-
-This question will be researched by using a selfmade chronological playlist of all their songs listed in their spotify page (except remixes). [Yellow Claw](https://yellowclaw.com/) has and probably will be one of my favorites. So comparing their progress over the years to try and find if there are any differences seemed like a logical conclusion. It is interesting because they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs.
-
-Personally I expect they changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the Mad Decent, which is Diplo's recordlabel. I suspect they learned a lot under Diplo's supervision, though I am unsure as to how they changed specifically. Maybe they added more BPM, changed timbres or they completely renewed themselves.
-
-However there might not be a big change at all. Since they have only been active for 10 years of which they spend only 8 producing their own songs. This might barely be enough or fall just short of enough time, especially since the 2021 songs are rather different than the others before. 
-
-"Thunder", "Shotgun", "Till It Hurts", "Amsterdamned", "In My Room" and "DJ Turn It Up" are very typical songs. These are very typical as they define their past and current style in beat and beatdrop. Whereas "Assets", "P*\$\$YRICH", "Wild Mustang", "Villain", "Another Life" and "Kiss Your Lips" are atypical songs. The last one is very strange as it is happy hardcore, a genre that does not suit Yellow Claw's style, the same could be said for the other atypical songs.
-
-### This is Yellow Claw
-
-[The playlist:](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw)
-
-```{r}
-playlistYC <- YCData %>% select(track.name, track.album.release_date)
-                
-datatable(playlistYC, rownames = FALSE, class = "table1",
-          colnames = c('Name', 'Release date'), 
-          options = list(scrollY = "500px", pageLength = 120, paging = FALSE))
-```
-
-### To Bizzey or not to Bizzey? A-side
-
-```{r First Plot, echo=FALSE}
-p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness, 
-                      text = paste("Name:", track.name, "\n", "Label:", Label, "\n",
-                                  "Speechiness:", speechiness, "\n",
-                                  "Liveness:", liveness))) + 
-                      geom_point(position = position_jitter(), aes(alpha = 0.8)) +
-                      scale_y_log10() +
-                      geom_rug(size = 0.2, sides = "l") +      # Add 'fringes' to show data distribution.
-                      scale_color_manual(values = c("#FFCA00", "#56B4E9", "#999999")) +
-                      facet_wrap(~Bizzey, scales = "free_x") +
-                      theme_light() +
-                      labs(x = "Year", y = "Speechiness",
-                           title = "The change of Bizzey's departure",
-                           subtitle = "In Speechiness and Liveness vs Years <br>") +
-                      guides(size = FALSE, alpha = FALSE)
-
-ggplotly(p1, tooltip = "text") %>%
-  layout(title = list(text = paste("The change of Bizzey's departure",
-                                    "<br>",
-                                    "<sup>",
-                                    "In Speechiness and Liveness vs Years",
-                                    "</sup>")),
-          margin = list(t = 100))
-```
-
-***
-
-This plot shows the difference in speechiness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would expect the departure of a MC to decrease the speechiness of produced songs, but this is not the case here.
-
-### To Bizzey or not to Bizzey? B-side
-
-```{r echo=FALSE}
-# Possible interesting comparisons
-# year/instrumentalness
-# energy/loudness
-# energy/speechiness
-# energy/instrumentalness
-# speechiness/loudness
-# acousticness/loudness
-
-p2 <- YCData %>% ggplot(aes(year, acousticness, color = Label, size = liveness, 
-                      text = paste("Name:", track.name, "\n", "Label:", Label, "\n",
-                                  "Acousticness:", acousticness, "\n",
-                                  "Liveness:", liveness))) + 
-                      geom_point(position = position_jitter(), aes(alpha = 0.8)) +
-                      scale_y_log10() +
-                      geom_rug(size = 0.2, sides = "l") +      # Add 'fringes' to show data distribution.
-                      scale_color_manual(values = c("#FFCA00", "#56B4E9", "#999999")) +
-                      facet_wrap(~Bizzey, scales = "free_x") +
-                      theme_light() +
-                      labs(x = "Year", y = "Acousticness",
-                           title = "The change of Bizzey's departure", 
-                           subtitle = "In Acousticness and Liveness vs Years") +
-                      guides(size = FALSE, alpha = FALSE)
-
-ggplotly(p2, tooltip = "text") %>%
-  layout(title = list(text = paste("The change of Bizzey's departure",
-                                    "<br>",
-                                    "<sup>",
-                                    "In Acousticness and Liveness vs Years",
-                                    "</sup>")),
-          margin = list(t = 100))
-```
-
-***
-
-This plot shows the difference in acousticness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the acousticness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the acousticness since Bizzey was a MC. You would expect the departure of a MC to decrease the acousticness of produced songs, but this is not the case here.
-
-```{r echo=FALSE}
-
-#p3 <- ggplot(data = YCData %>%
-#               arrange(energy) %>%
-#             slice(1:5, (n()-4):n()),
-#             aes(x = energy, y = track.name, color = Label, shape = MadDecent)) +
-#            geom_point(size = 4) +
-#            geom_segment(aes(xend = 0, yend = track.name), size = 2)
-```
-
-### Looking at the Loudest MF
-
-```{r}
-LMF <-
-  get_tidy_audio_analysis("34xsvZ1A2Ou1oo1VyOwQG1") %>%
-  select(segments) %>%
-  unnest(segments) %>%
-  select(start, duration, pitches)
-```
-
-```{r}
-LMF %>%
-  mutate(pitches = map(pitches, compmus_normalise, "chebyshev")) %>%
-  compmus_gather_chroma() %>% 
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = pitch_class,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Chromagram Loudest MF") +
-  theme_minimal() +
-  scale_fill_viridis_c()
-```
-
-
-***
-
-Here we can see the chromagram of [Loudest MF](https://open.spotify.com/track/34xsvZ1A2Ou1oo1VyOwQG1?si=5xdFXOTaSeWKOmF3pZgbwg), which scored very high on speechiness.
-
-You can see the fade away of sound between 28 and 36 sec as only G# is present which is the muffled tone.
-After this it is clear that there is a distinct beat since it is visible in A/Ab and E/Eb and slightly in C#/C. This until around 50 sec where the rapper starts and the spectrum contains more yellow and thus there are more fequencies present until around 65 sec.
-You can see and hear at 85 sec the second beat drop, with a lot of clean notes being played until 115 sec. Also you can see at 105 sec is where the rapper says 'bounce' a couple of times as the C# is faded in the C. 
-Then the rapper starts again as visible in the amount of present frequencies. At 155 sec the third beat starts decently clean as most is present in G# but around 160 seconds muffled sound is added to the beat and the beat gets more components from then on. However it is still clear that the music fluctuates between high and low. 
 
 ### The answer
+
+404 Not found: Due to the research being incomplete we are not yet able to find an answer.
