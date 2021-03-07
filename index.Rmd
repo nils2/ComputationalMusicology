@@ -45,6 +45,7 @@ library(compmus)
 library(DT)
 library(forcats)
 library(purrr)
+library(patchwork)
 ```
 
 ```{r Load Playlist, echo=FALSE}
@@ -273,6 +274,9 @@ diffBA <-
   befor %>%
   mutate(genre = "With") %>%
   bind_rows(after %>% mutate(genre = "Without"))
+
+rm(befor)
+rm(after)
 ```
 
 ```{r}
@@ -299,6 +303,8 @@ diffBA %>%
 
 ***
 
+
+
 ### *NEW*  Key and chords
 
 ```{r}
@@ -307,6 +313,7 @@ diffBA %>%
 
 
 ***
+
 
 
 ### Yellow *M^ther Facking* Claw
@@ -322,9 +329,6 @@ However there might not be a big change at all. Since they have only been active
 * Thunder
 * Shotgun
     + Most popular youtube video with 186 million views.
-* Till It Hurts
-* Amsterdamned
-* In My Room
 * DJ Turn It Up
     + Most popular spotify song with 167 million plays. 
 
@@ -332,10 +336,7 @@ These are very typical as they define their past and current style in beat and b
 
 **Atypical tracks:**
     
-* Assets
 * P*\$\$YRICH
-* Wild Mustang
-* Villain
 * Another Life
 * Kiss Your Lips
     + This one is very strange as it is happy hardcore, a genre that does not suit Yellow Claw's style nor do they have any similar songs.
@@ -528,9 +529,9 @@ bind_rows(
 
 ***
 
-All the points talked about previously in Looking at the Loudest MF are clearly visible in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was no repetition found by spotify. 
+All the points talked about previously in Looking at the Loudest MF are clearly visible in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was no repetition found by Spotify. 
 
-### A closer look at *DJ turn it up*
+### Comparing with typical tracks
 ```{r}
 bzt2 <-
   get_tidy_audio_analysis("1ivuWgxFQb2xzxVNSlB1hF") %>% # Change URI.
@@ -551,41 +552,93 @@ bzt2 <-
         method = "rms", norm = "euclidean"              # Change summary & norm.
       )
   )
+
+bzt3 <-
+  get_tidy_audio_analysis("2k4WuXHm3dnC7ccWF82cWy") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
 ```
 
 ```{r}
-bind_rows(
-  bzt2 %>%
-    compmus_self_similarity(pitches, "manhattan") %>%
-    mutate(d = d / max(d), type = "Chroma"),
-  bzt2 %>%
-    compmus_self_similarity(timbre, "euclidean") %>%
-    mutate(d = d / max(d), type = "Timbre")
-) %>%
-  mutate() %>%
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_fixed() +
-  facet_wrap(~type) +
-  scale_fill_viridis_c(option = 'E', guide = "none") +
-  theme_classic() +
-  labs(x = "", y = "")
+p3 <- bind_rows(
+        bzt2 %>%
+          compmus_self_similarity(pitches, "manhattan") %>%
+          mutate(d = d / max(d), type = "Chroma"),
+        bzt2 %>%
+          compmus_self_similarity(timbre, "euclidean") %>%
+          mutate(d = d / max(d), type = "Timbre")
+      ) %>%
+        mutate() %>%
+        ggplot(
+          aes(
+            x = xstart + xduration / 2,
+            width = xduration,
+            y = ystart + yduration / 2,
+            height = yduration,
+            fill = d
+          )
+        ) +
+        geom_tile() +
+        coord_fixed() +
+        facet_wrap(~type) +
+        scale_fill_viridis_c(option = 'E', guide = "none") +
+        theme_classic() +
+        labs(x = "", y = "", title = "DJ Turn It Up")
 
+p4 <- bind_rows(
+        bzt3 %>%
+          compmus_self_similarity(pitches, "manhattan") %>%
+          mutate(d = d / max(d), type = "Chroma"),
+        bzt3 %>%
+          compmus_self_similarity(timbre, "euclidean") %>%
+          mutate(d = d / max(d), type = "Timbre")
+      ) %>%
+        mutate() %>%
+        ggplot(
+          aes(
+            x = xstart + xduration / 2,
+            width = xduration,
+            y = ystart + yduration / 2,
+            height = yduration,
+            fill = d
+          )
+        ) +
+        geom_tile() +
+        coord_fixed() +
+        facet_wrap(~type) +
+        scale_fill_viridis_c(option = 'E', guide = "none") +
+        theme_classic() +
+        labs(x = "", y = "", title = "Amsterdamned")
+
+p3/p4
 ```
 
 ***
 
+Here two songs are compared to *Loudest MF*, namely *DJ Turn It Up* and *Amsterdamned*. The first is a typical track that dates back to when Bizzey was still a member of Yellow Claw. Whilst the second is a typical track that was done without Bizzey.
+
+**DJ Turn It Up**
+
 From the timbre-based self-similarity matrices a pattern of the song becomes clear. It is visible that from 20 sec to 95 sec in the song the same occurs as from 95 sec to 160 sec. This coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
+**Amsterdamned**
 
+Both the timbre-based and chroma-based self-similarity matrices visualize a very repetitive track. It is visible that from 45 sec to 95 sec in the song the same occurs as from 125 sec to 175 sec. But also from 20 sec to 45 sec the track is repeated in 95 sec to 125 sec. This also coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
 ### The answer
 
