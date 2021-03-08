@@ -287,7 +287,7 @@ YCData %>%
 
 ***
 
-There clearly is a difference in the key use after Bizzey leaves. His departure brought way **more tracks in F** both major and minor, and **more tracks in C# major**. Also the graph is more shifted towards the A, A# and B this in the minor of those keys.  
+Spotify assigns each track a key that was mainly used according to their feature analysis. In this graph, one can see all the main keys of the tracks before and after Bizzey left the group. There clearly is a difference in the key use after Bizzey leaves. His departure brought way **more tracks in F** both major and minor, and **more tracks in C# major**. Also the graph is more shifted towards the A, A# and B this in the minor of those keys. Most tracks made with Bizzey are played in both G major and minor, however they are tied with a lot of other keys. One can also note how the G minor key is used less often after he left the group.
 
 
 ### *NEW*  Shift in Loudness
@@ -497,7 +497,7 @@ LMF %>%
 Here we can see the chromagram of [Loudest MF](https://open.spotify.com/track/34xsvZ1A2Ou1oo1VyOwQG1?si=5xdFXOTaSeWKOmF3pZgbwg), which scored very high on speechiness.
 
 You can see the fade away of sound between 28 and 36 sec as only G# is present which is the muffled tone.
-After this it is clear that there is a distinct beat since it is visible in A/Ab and E/Eb and slightly in C#/C. This until around 50 sec where the rapper starts and the spectrum contains more yellow and thus there are more fequencies present until around 65 sec.
+After this it is clear that there is a distinct beat since it is visible in A/Ab and E/Eb and slightly in C#/C. This until around 50 sec where the rapper starts and the spectrum contains more yellow and thus there are more frequencies present until around 65 sec.
 You can see and hear at 85 sec the second beat drop, with a lot of clean notes being played until 115 sec. Also you can see at 105 sec is where the rapper says 'bounce' a couple of times as the C# is faded in the C. 
 Then the rapper starts again as visible in the amount of present frequencies. At 155 sec the third beat starts decently clean as most is present in G# but around 160 seconds muffled sound is added to the beat and the beat gets more components from then on. However it is still clear that the music fluctuates between high and low. 
 
@@ -555,7 +555,7 @@ bind_rows(
 
 ***
 
-All the points talked about previously in Looking at the Loudest MF are clearly visible in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was no repetition found by Spotify. 
+All the points talked about previously in Looking at the Loudest MF are clearly visible in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was not alot of repetition found by Spotify. 
 
 ### Comparing with typical tracks
 ```{r}
@@ -600,7 +600,7 @@ bzt3 <-
   )
 ```
 
-```{r}
+```{r, fig.width=10,fig.height=11}
 p3 <- bind_rows(
         bzt2 %>%
           compmus_self_similarity(pitches, "manhattan") %>%
@@ -656,7 +656,7 @@ p3/p4
 
 ***
 
-Here two songs are compared to *Loudest MF*, namely *DJ Turn It Up* and *Amsterdamned*. The first is a typical track that dates back to when Bizzey was still a member of Yellow Claw. Whilst the second is a typical track that was done without Bizzey.
+Here two songs are compared to *Loudest MF*, namely [*DJ Turn It Up*](https://open.spotify.com/track/1ivuWgxFQb2xzxVNSlB1hF?si=bftjfytFSw2nOp4MqRPfgQ) and [*Amsterdamned*](https://open.spotify.com/track/5VkKghJxtZV1PHBSvmb2kw?si=Yv86SAoRRjWe6jHYJpscBQ). The first is a typical track that dates back to when Bizzey was still a member of Yellow Claw. Whilst the second is a typical track that was done without Bizzey.
 
 **DJ Turn It Up**
 
