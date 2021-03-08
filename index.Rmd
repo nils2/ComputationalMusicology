@@ -259,7 +259,44 @@ key_templates <-
   )
 ```
 
+### *NEW*  Key and chords
+
+```{r}
+YCData %>%
+  ggplot(                     # Set up the plot.
+    aes(
+      x = key_name,
+      y = (stat(count)/sum(stat(count))),
+      fill = mode_name
+    )
+  ) +
+  scale_fill_manual(values = c("#FFDC00", "#7C7B78FF")) +
+  facet_wrap(~Bizzey) +
+  geom_bar() +
+  theme_light() +
+  theme(strip.background = element_rect(fill="#7C7B78FF")) +
+  labs(
+    x = "Key",
+    y = "Amount of tracks",
+    title = "Key comparison tracks Bizzey",
+    fill = "Mode"
+  ) +
+  scale_y_continuous(labels = scales::percent)
+```
+
+
+***
+
+There clearly is a difference in the key use after Bizzey leaves. His departure brought way **more tracks in F** both major and minor, and **more tracks in C# major**. Also the graph is more shifted towards the A, A# and B this in the minor of those keys.  
+
+
 ### *NEW*  Shift in Loudness
+
+```{r}
+#YCData %>%
+#  ggplot(aes(x = Bizzey, y = loudness)) +
+#  geom_boxplot()
+```
 
 ```{r}
 befor <-
@@ -295,7 +332,7 @@ diffBA %>%
   ggplot(aes(x = basis, y = value, fill = genre)) +
   geom_violin() +
   scale_fill_viridis_d() +
-  scale_fill_manual(values=c("#7C7B78FF", "#FFEC00")) +
+  scale_fill_manual(values=c("#7C7B78FF", "#FFCC00")) +
   theme_light() +
   labs(x = "Spotify Timbre Coefficients", y = "", fill = "Bizzey")
 ```
@@ -303,18 +340,7 @@ diffBA %>%
 
 ***
 
-
-
-### *NEW*  Key and chords
-
-```{r}
-
-```
-
-
-***
-
-
+In this graph one can hardly distinguish between the two time area of Yellow Claw, c06 and c12 are slightly different after Bizzey left for example. However there is **one big difference**, the variance in c02 which is known as **the loudness of tracks**. Here it is visible that loudness has a range of nearly 100 when Bizzey was still in the band. However after his departure the range nearly doubles as it gets close to a range of 200. 
 
 ### Yellow *M^ther Facking* Claw
 
