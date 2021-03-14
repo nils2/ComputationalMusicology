@@ -382,7 +382,7 @@ playlistYC <- YCData %>% select(track.name, track.album.release_date)
                 
 datatable(playlistYC, rownames = FALSE, class = "table1",
           colnames = c('Name', 'Release date'), 
-          options = list(scrollY = "490px", pageLength = 120, paging = FALSE))
+          options = list(scrollY = "450px", pageLength = 120, paging = FALSE))
 ```
 
 ### To Bizzey or not to Bizzey? *A-side*
@@ -704,7 +704,7 @@ From the timbre-based self-similarity matrices a pattern of the song becomes cle
 
 Both the timbre-based and chroma-based self-similarity matrices visualize a very repetitive track. It is visible that from 45 sec to 95 sec in the song the same occurs as from 125 sec to 175 sec. But also from 20 sec to 45 sec the track is repeated in 95 sec to 125 sec. This also coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
-### Key and chords
+### New key and chords?
 
 ```{r}
 YCData %>%
@@ -735,7 +735,7 @@ YCData %>%
 Spotify assigns each track a key that was mainly used according to their feature analysis. In this graph, one can see all the main keys of the tracks before and after Bizzey left the group. There clearly is a difference in the key use after Bizzey leaves. His departure brought way **more tracks in F** both major and minor, and **more tracks in C# major**. Also the graph is more shifted towards the A, A# and B this in the minor of those keys. Most tracks made with Bizzey are played in both G major and minor, however they are tied with a lot of other keys. One can also note how the G minor key is used less often after he left the group.
 
 
-### Shift in Loudness
+### A shift in Style?
 
 ```{r}
 #YCData %>%
