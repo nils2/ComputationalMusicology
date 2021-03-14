@@ -317,10 +317,11 @@ p8 <- YCData %>%
         ggplot(aes(x = tempo, y = stat(count), fill = Label)) +
         facet_wrap(~Bizzey) +
         coord_flip() +
-        scale_fill_manual(values = c("#00204DFF", "#7C7B78FF", "#FFBC00")) +
+        scale_fill_manual(values = c("#00204DFF", "#7C7B78FF", "#FFCC00")) +
         geom_histogram(binwidth = 10) +
         theme_light() +
-        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"))
+        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA")) +
+        labs(title = "Tempo distribution", x = "Tempo")
 ```
 
 ```{r}
@@ -331,7 +332,8 @@ p9 <- YCData %>%
         geom_violin() +
         theme_light() +
         theme(strip.background = element_rect(fill="#7C7B78FF")) +
-        guides(color = FALSE, fill = FALSE)
+        guides(color = FALSE, fill = FALSE) +
+        labs(y = "Tempo")
 ```
 
 ```{r}
@@ -341,7 +343,7 @@ p8/p9
 
 ***
 
-Hey
+Here one can see two graphs which emphasize the same 
 
 
 
@@ -382,7 +384,7 @@ playlistYC <- YCData %>% select(track.name, track.album.release_date)
                 
 datatable(playlistYC, rownames = FALSE, class = "table1",
           colnames = c('Name', 'Release date'), 
-          options = list(scrollY = "450px", pageLength = 120, paging = FALSE))
+          options = list(scrollY = "400px", pageLength = 120, paging = FALSE))
 ```
 
 ### To Bizzey or not to Bizzey? *A-side*
@@ -402,15 +404,16 @@ p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness,
                       labs(x = "Year", y = "Speechiness",
                            title = "The change of Bizzey's departure",
                            subtitle = "In Speechiness and Liveness vs Years <br>") +
-                      guides(size = FALSE, alpha = FALSE)
+                      guides(size = FALSE, alpha = FALSE, colour = guide_legend(override.aes = list(alpha = 1)))
 
 ggplotly(p1, tooltip = "text") %>%
   layout(title = list(text = paste("The change of Bizzey's departure",
                                     "<br>",
                                     "<sup>",
-                                    "In Speechiness and Liveness vs Years",
+                                    "In Speechiness and Liveness vs Years under the Labels they were published",
                                     "</sup>")),
-          margin = list(t = 100))
+          margin = list(t = 100),
+          legend = list(orientation = "v", x = 0.03, y = 0.95))
 ```
 
 ***
@@ -442,15 +445,16 @@ p2 <- YCData %>% ggplot(aes(year, acousticness, color = Label, size = liveness,
                       labs(x = "Year", y = "Acousticness",
                            title = "The change of Bizzey's departure", 
                            subtitle = "In Acousticness and Liveness vs Years") +
-                      guides(size = FALSE, alpha = FALSE)
+                      guides(size = FALSE, alpha = FALSE, colour = guide_legend(override.aes = list(alpha = 1)))
 
 ggplotly(p2, tooltip = "text") %>%
   layout(title = list(text = paste("The change of Bizzey's departure",
                                     "<br>",
                                     "<sup>",
-                                    "In Acousticness and Liveness vs Years",
+                                    "In Acousticness and Liveness vs Years under the Labels they were published",
                                     "</sup>")),
-          margin = list(t = 100))
+          margin = list(t = 100),
+          legend = list(orientation = "v", x = 0.03, y = 0.03))
 ```
 
 ***
@@ -493,10 +497,10 @@ LMF %>%
   labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Chromagram Loudest MF") +
   theme_minimal() +
   scale_fill_viridis_c(option = 'E') +
-  geom_vline(xintercept = 28,
+  geom_vline(xintercept = 29,
              color = "white",
              size = 0.8) +
-  geom_vline(xintercept = 36,
+  geom_vline(xintercept = 37,
              color = "white",
              size = 0.8) +
   geom_vline(xintercept = 50,
@@ -508,19 +512,19 @@ LMF %>%
   geom_vline(xintercept = 85,
              color = "white",
              size = 0.8) +
-  geom_vline(xintercept = 115,
+  geom_vline(xintercept = 114,
              color = "white",
              size = 0.8) +
-  geom_vline(xintercept = 155,
+  geom_vline(xintercept = 154,
              color = "white",
-             size = 0.8) +
-  annotate(geom="text", 
-          x=89, 
-          y="A", 
-          label="First drop",
-          color="white",
-          fontface = 2,
-          hjust=0)
+             size = 0.8)
+#  annotate(geom="text", 
+#          x=89, 
+#          y="A", 
+#          label="First drop",
+#          color="white",
+#          fontface = 2,
+#          hjust=0)
 ```
 
 
@@ -561,10 +565,10 @@ bzt <-
 bind_rows(
   bzt %>%
     compmus_self_similarity(pitches, "manhattan") %>%
-    mutate(d = d / max(d), type = "Chroma"),
+    mutate(d = d / max(d), type = "Chroma-based"),
   bzt %>%
     compmus_self_similarity(timbre, "euclidean") %>%
-    mutate(d = d / max(d), type = "Timbre")
+    mutate(d = d / max(d), type = "Timbre-based")
 ) %>%
   mutate() %>%
   ggplot(
@@ -582,8 +586,17 @@ bind_rows(
   scale_fill_viridis_c(option = 'E', guide = "none") +
   theme_classic() +
   theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"), strip.text = element_text(color = "white")) +
-  labs(x = "", y = "") +
-  geom_vline(xintercept = 150,
+  labs(x = "", y = "", title = "Self-similarity matrices of 'Loudest MF'") +
+  geom_vline(xintercept = 153,
+             color = "white",
+             size = 0.8) +
+  geom_vline(xintercept = 114,
+             color = "white",
+             size = 0.8) +
+  geom_vline(xintercept = 86,
+             color = "white",
+             size = 0.8) +
+  geom_vline(xintercept = 39,
              color = "white",
              size = 0.8)
 
@@ -640,10 +653,10 @@ bzt3 <-
 p3 <- bind_rows(
         bzt2 %>%
           compmus_self_similarity(pitches, "manhattan") %>%
-          mutate(d = d / max(d), type = "Chroma"),
+          mutate(d = d / max(d), type = "Chroma-based"),
         bzt2 %>%
           compmus_self_similarity(timbre, "euclidean") %>%
-          mutate(d = d / max(d), type = "Timbre")
+          mutate(d = d / max(d), type = "Timbre-based")
       ) %>%
         mutate() %>%
         ggplot(
@@ -661,15 +674,24 @@ p3 <- bind_rows(
         scale_fill_viridis_c(option = 'E', guide = "none") +
         theme_classic() +
         theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"), strip.text = element_text(color = "white")) +
-        labs(x = "", y = "", title = "DJ Turn It Up")
+        labs(x = "", y = "", title = "Self-similarity matrices of 'DJ Turn It Up'") +
+        geom_vline(xintercept = 18,
+             color = "white",
+             size = 0.8) +
+        geom_vline(xintercept = 94,
+             color = "white",
+             size = 0.8) +
+        geom_vline(xintercept = 168,
+             color = "white",
+             size = 0.8)
 
 p4 <- bind_rows(
         bzt3 %>%
           compmus_self_similarity(pitches, "manhattan") %>%
-          mutate(d = d / max(d), type = "Chroma"),
+          mutate(d = d / max(d), type = "Chroma-based"),
         bzt3 %>%
           compmus_self_similarity(timbre, "euclidean") %>%
-          mutate(d = d / max(d), type = "Timbre")
+          mutate(d = d / max(d), type = "Timbre-based")
       ) %>%
         mutate() %>%
         ggplot(
@@ -687,7 +709,16 @@ p4 <- bind_rows(
         scale_fill_viridis_c(option = 'E', guide = "none") +
         theme_classic() +
         theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"), strip.text = element_text(color = "white")) +
-        labs(x = "", y = "", title = "Amsterdamned")
+        labs(x = "", y = "", title = "Self-similarity matrices of 'Amsterdamned'") +
+        geom_vline(xintercept = 40,
+             color = "white",
+             size = 0.8) +
+        geom_vline(xintercept = 97,
+             color = "white",
+             size = 0.8) +
+        geom_vline(xintercept = 124,
+             color = "white",
+             size = 0.8)
 
 p3/p4
 ```
@@ -704,14 +735,14 @@ From the timbre-based self-similarity matrices a pattern of the song becomes cle
 
 Both the timbre-based and chroma-based self-similarity matrices visualize a very repetitive track. It is visible that from 45 sec to 95 sec in the song the same occurs as from 125 sec to 175 sec. But also from 20 sec to 45 sec the track is repeated in 95 sec to 125 sec. This also coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
-### New key and chords?
+### What's the Key?
 
 ```{r}
 YCData %>%
   ggplot(                     # Set up the plot.
     aes(
       x = key_name,
-      y = (stat(count)/sum(stat(count))),
+      y = stat(count),
       fill = mode_name
     )
   ) +
@@ -719,14 +750,14 @@ YCData %>%
   facet_wrap(~Bizzey) +
   geom_bar() +
   theme_light() +
-  theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA")) +
+  theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"),
+        legend.position = c(0.1, 0.85)) +
   labs(
     x = "Key",
     y = "Amount of tracks",
     title = "Key comparison tracks Bizzey",
     fill = "Mode"
-  ) +
-  scale_y_continuous(labels = scales::percent)
+  )
 ```
 
 
@@ -779,7 +810,8 @@ p6 <- diffBA %>%
           scale_fill_viridis_d() +
           scale_fill_manual(values=c("#7C7B78FF", "#FFCC00")) +
           theme_light() +
-          labs(x = "Timbre coefficients", y = "", fill = "Bizzey")
+          theme(legend.position = c(0.50, 0.85), legend.direction = "horizontal") +
+          labs(x = "Timbre coefficients", y = "", fill = "Bizzey", title = "Lower-level audio analysis")
 ```
 
 ```{r}
@@ -800,6 +832,7 @@ p7 <- diffBA %>%
           scale_fill_viridis_d() +
           scale_fill_manual(values=c("#7C7B78FF", "#FFCC00")) +
           theme_light() +
+          theme(legend.position = "none") +
           labs(x = "Pitch classes", y = "", fill = "Bizzey")
 ```
 
@@ -812,7 +845,7 @@ p6 / p7
 
 **Timbre coefficients**
 
-In this graph one can hardly distinguish between the two time area of Yellow Claw, c06 and c12 are slightly different after Bizzey left for example. However there is **one big difference**, the variance in c02 which is known as **the loudness of tracks**. Here it is visible that loudness has a range of nearly 100 when Bizzey was still in the band. However after his departure the range nearly doubles as it gets close to a range of 200. 
+In this graph one can hardly distinguish between the two time area of Yellow Claw, c06 and c12 are slightly different after Bizzey left for example. However there is **one big difference**, the variance in c02 which is known as **the loudness brightness of a track**. Here it is visible that loudness has a range of nearly 100 when Bizzey was still in the band. However after his departure the range nearly doubles as it gets close to a range of 200. 
 
 **Pitch classes**
 
