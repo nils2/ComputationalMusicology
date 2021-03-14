@@ -316,34 +316,34 @@ key_templates <-
 p8 <- YCData %>%
         ggplot(aes(x = tempo, y = stat(count), fill = Label)) +
         facet_wrap(~Bizzey) +
-        coord_flip() +
-        scale_fill_manual(values = c("#00204DFF", "#7C7B78FF", "#FFCC00")) +
+        scale_fill_manual(values = c("#00204DFF", "#7C7B78FF", "#FFBC00")) +
         geom_histogram(binwidth = 10) +
         theme_light() +
-        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA")) +
-        labs(title = "Tempo distribution", x = "Tempo")
+        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"),
+              legend.position = c(0.13, 0.8)) +
+        labs(title = "Tempo distribution", x = "Tempo", y = "Count", subtitle = "Distributed over the time period with and without Bizzey")
 ```
 
 ```{r}
-p9 <- YCData %>%
-        ggplot(aes(Bizzey, tempo, fill = Bizzey, color = Bizzey)) +
-        scale_fill_manual(values = c("#7C7B78FF", "#FFCC00")) +
-        scale_color_manual(values = c("#7C7B78FF", "#FFCC00")) +
-        geom_violin() +
-        theme_light() +
-        theme(strip.background = element_rect(fill="#7C7B78FF")) +
-        guides(color = FALSE, fill = FALSE) +
-        labs(y = "Tempo")
+#p9 <- YCData %>%
+#        ggplot(aes(Bizzey, tempo, fill = Bizzey, color = Bizzey)) +
+#        scale_fill_manual(values = c("#7C7B78FF", "#FFCC00")) +
+#        scale_color_manual(values = c("#7C7B78FF", "#FFCC00")) +
+#        geom_violin() +
+#        theme_light() +
+#        theme(strip.background = element_rect(fill="#7C7B78FF")) +
+#        guides(color = FALSE, fill = FALSE) +
+#        labs(y = "Tempo")
 ```
 
 ```{r}
-p8/p9
+p8
 ```
 
 
 ***
 
-Here one can see two graphs which emphasize the same 
+
 
 
 
@@ -839,7 +839,6 @@ p7 <- diffBA %>%
 ```{r}
 p6 / p7
 ```
-
 
 ***
 
