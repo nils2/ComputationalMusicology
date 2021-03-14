@@ -46,6 +46,7 @@ library(DT)
 library(forcats)
 library(purrr)
 library(patchwork)
+library(cowplot)
 ```
 
 ```{r Load Playlist, echo=FALSE}
@@ -59,9 +60,11 @@ YCSum <-
       mean_speechiness = mean(speechiness),
       mean_acousticness = mean(acousticness),
       mean_liveness = mean(liveness),
+      mean_tempo = mean(tempo),
       sd_speechiness = sd(speechiness),
       sd_acousticness = sd(acousticness),
       sd_liveness = sd(liveness),
+      sd_tempo = sd(tempo),
       median_speechiness = median(speechiness),
       median_acousticness = median(acousticness),
       median_liveness = median(liveness),
@@ -70,7 +73,6 @@ YCSum <-
       mad_liveness = mad(liveness)
     )
 ```
-
 
 ```{r Change Data, echo=FALSE}
 year <- YCData %>% pull(track.album.release_date)
@@ -111,10 +113,58 @@ Lab2 <- YCData %>% mutate(year,
 YCData <- Lab2
 rm(Lab2)
 
+Lab3 <- YCData %>% mutate(year,
+               RealAlbums = ifelse(track.album.name %in% c("Blood For Mercy", 
+                                  "Los Amsterdam", "New Blood", "Never Dies"),
+                                  track.album.name, "Not an Album"))
+YCData <- Lab3
+rm(Lab3)
+
 Biz <- YCData %>% mutate(year,
                Bizzey = ifelse(year < 2016 | (year == 2016 & month < 05), "With", "Without"))
 YCData <- Biz
 rm(Biz)
+```
+
+```{r Data summary2, echo=FALSE}
+YCSumBefore <-
+  YCData %>%
+  filter(YCData$Bizzey == "With") %>%
+    summarise(
+      mean_speechiness = mean(speechiness),
+      mean_acousticness = mean(acousticness),
+      mean_liveness = mean(liveness),
+      mean_tempo = mean(tempo),
+      sd_speechiness = sd(speechiness),
+      sd_acousticness = sd(acousticness),
+      sd_liveness = sd(liveness),
+      sd_tempo = sd(tempo),
+      median_speechiness = median(speechiness),
+      median_acousticness = median(acousticness),
+      median_liveness = median(liveness),
+      mad_speechiness = mad(speechiness),
+      mad_acousticness = mad(acousticness),
+      mad_liveness = mad(liveness)
+    )
+YCSumAfter <-
+  YCData %>%
+  filter(YCData$Bizzey == "Without") %>%
+    summarise(
+      mean_speechiness = mean(speechiness),
+      mean_acousticness = mean(acousticness),
+      mean_liveness = mean(liveness),
+      mean_tempo = mean(tempo),
+      sd_speechiness = sd(speechiness),
+      sd_acousticness = sd(acousticness),
+      sd_liveness = sd(liveness),
+      sd_tempo = sd(tempo),
+      median_speechiness = median(speechiness),
+      median_acousticness = median(acousticness),
+      median_liveness = median(liveness),
+      mad_speechiness = mad(speechiness),
+      mad_acousticness = mad(acousticness),
+      mad_liveness = mad(liveness)
+    )
 ```
 
 ```{r, echo=FALSE}
@@ -259,92 +309,46 @@ key_templates <-
   )
 ```
 
-### *NEW*  Key and chords
+
+### *NEW * Tempo
 
 ```{r}
-YCData %>%
-  ggplot(                     # Set up the plot.
-    aes(
-      x = key_name,
-      y = (stat(count)/sum(stat(count))),
-      fill = mode_name
-    )
-  ) +
-  scale_fill_manual(values = c("#FFDC00", "#7C7B78FF")) +
-  facet_wrap(~Bizzey) +
-  geom_bar() +
-  theme_light() +
-  theme(strip.background = element_rect(fill="#7C7B78FF")) +
-  labs(
-    x = "Key",
-    y = "Amount of tracks",
-    title = "Key comparison tracks Bizzey",
-    fill = "Mode"
-  ) +
-  scale_y_continuous(labels = scales::percent)
+p8 <- YCData %>%
+        ggplot(aes(x = tempo, y = stat(count), fill = Label)) +
+        facet_wrap(~Bizzey) +
+        coord_flip() +
+        scale_fill_manual(values = c("#00204DFF", "#7C7B78FF", "#FFBC00")) +
+        geom_histogram(binwidth = 10) +
+        theme_light() +
+        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"))
+```
+
+```{r}
+p9 <- YCData %>%
+        ggplot(aes(Bizzey, tempo, fill = Bizzey, color = Bizzey)) +
+        scale_fill_manual(values = c("#7C7B78FF", "#FFCC00")) +
+        scale_color_manual(values = c("#7C7B78FF", "#FFCC00")) +
+        geom_violin() +
+        theme_light() +
+        theme(strip.background = element_rect(fill="#7C7B78FF")) +
+        guides(color = FALSE, fill = FALSE)
+```
+
+```{r}
+p8/p9
 ```
 
 
 ***
 
-Spotify assigns each track a key that was mainly used according to their feature analysis. In this graph, one can see all the main keys of the tracks before and after Bizzey left the group. There clearly is a difference in the key use after Bizzey leaves. His departure brought way **more tracks in F** both major and minor, and **more tracks in C# major**. Also the graph is more shifted towards the A, A# and B this in the minor of those keys. Most tracks made with Bizzey are played in both G major and minor, however they are tied with a lot of other keys. One can also note how the G minor key is used less often after he left the group.
+Hey
 
 
-### *NEW*  Shift in Loudness
 
-```{r}
-#YCData %>%
-#  ggplot(aes(x = Bizzey, y = loudness)) +
-#  geom_boxplot()
-```
+### Yellow *M F * Claw
 
-```{r}
-befor <-
-  YCData %>%
-  filter(YCData$Bizzey == "With") %>%
-  add_audio_analysis()
-after <-
-  YCData %>%
-  filter(YCData$Bizzey == "Without") %>%
-  add_audio_analysis()
-diffBA <-
-  befor %>%
-  mutate(genre = "With") %>%
-  bind_rows(after %>% mutate(genre = "Without"))
-
-rm(befor)
-rm(after)
-```
-
-```{r}
-diffBA %>%
-  mutate(
-    timbre =
-      map(
-        segments,
-        compmus_summarise,
-        timbre,
-        method = "mean"
-      )
-  ) %>%
-  select(genre, timbre) %>%
-  compmus_gather_timbre() %>%
-  ggplot(aes(x = basis, y = value, fill = genre)) +
-  geom_violin() +
-  scale_fill_viridis_d() +
-  scale_fill_manual(values=c("#7C7B78FF", "#FFCC00")) +
-  theme_light() +
-  labs(x = "Spotify Timbre Coefficients", y = "", fill = "Bizzey")
-```
-
-
-***
-
-In this graph one can hardly distinguish between the two time area of Yellow Claw, c06 and c12 are slightly different after Bizzey left for example. However there is **one big difference**, the variance in c02 which is known as **the loudness of tracks**. Here it is visible that loudness has a range of nearly 100 when Bizzey was still in the band. However after his departure the range nearly doubles as it gets close to a range of 200. 
-
-### Yellow *M^ther Facking* Claw
-
-[Yellow Claw](https://yellowclaw.com/) has and probably will keep being one of my favorite DJ's. Interestingly enough they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs. It started with three members named Bizzey, Jim Aasgier en Nizzle in 2010. Only Bizzey had experience previous to joining the group, as he released 2 songs under his name in 2006. Since I stuck with the group for so long it was only logical to analyze them. **Did Yellow Claw evolve over time?** Is a very interesting question as a few things happend over the years to the group. To research the question a self-made chronological playlist of all the songs listed in the Spotify page (except remixes) will be used. 
+[Yellow Claw](https://yellowclaw.com/) has and probably will keep being one of my favorite DJ's. Interestingly enough they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs. It started with three members named Bizzey, Jim Aasgier en Nizzle in 2010. Only Bizzey had experience previous to joining the group, as he released 2 songs under his name in 2006. Since I stuck with the group for so long it was only logical to analyze them. **Did Yellow Claw evolve over time?** Is a very interesting question as a few things happend over the years to the group. To research the question a self-made chronological playlist of all the s
+ongs listed in the Spotify page (except remixes) will be used. 
 
 Personally I expect they changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the Mad Decent, which is Diplo's recordlabel. However most likely the biggest change occurred in 2016 when Bizzey left the group to spend more time with his family. His main job was the MC, or master of ceremonies, which is used as an alternative indication for rappers or performing artists.
 
@@ -488,7 +492,35 @@ LMF %>%
   geom_tile() +
   labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Chromagram Loudest MF") +
   theme_minimal() +
-  scale_fill_viridis_c(option = 'E')
+  scale_fill_viridis_c(option = 'E') +
+  geom_vline(xintercept = 28,
+             color = "white",
+             size = 0.8) +
+  geom_vline(xintercept = 36,
+             color = "white",
+             size = 0.8) +
+  geom_vline(xintercept = 50,
+             color = "white",
+             size = 0.8) +
+  geom_vline(xintercept = 65,
+             color = "white",
+             size = 0.8) +
+  geom_vline(xintercept = 85,
+             color = "white",
+             size = 0.8) +
+  geom_vline(xintercept = 115,
+             color = "white",
+             size = 0.8) +
+  geom_vline(xintercept = 155,
+             color = "white",
+             size = 0.8) +
+  annotate(geom="text", 
+          x=89, 
+          y="A", 
+          label="First drop",
+          color="white",
+          fontface = 2,
+          hjust=0)
 ```
 
 
@@ -549,7 +581,11 @@ bind_rows(
   facet_wrap(~type) +
   scale_fill_viridis_c(option = 'E', guide = "none") +
   theme_classic() +
-  labs(x = "", y = "")
+  theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"), strip.text = element_text(color = "white")) +
+  labs(x = "", y = "") +
+  geom_vline(xintercept = 150,
+             color = "white",
+             size = 0.8)
 
 ```
 
@@ -624,6 +660,7 @@ p3 <- bind_rows(
         facet_wrap(~type) +
         scale_fill_viridis_c(option = 'E', guide = "none") +
         theme_classic() +
+        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"), strip.text = element_text(color = "white")) +
         labs(x = "", y = "", title = "DJ Turn It Up")
 
 p4 <- bind_rows(
@@ -649,6 +686,7 @@ p4 <- bind_rows(
         facet_wrap(~type) +
         scale_fill_viridis_c(option = 'E', guide = "none") +
         theme_classic() +
+        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"), strip.text = element_text(color = "white")) +
         labs(x = "", y = "", title = "Amsterdamned")
 
 p3/p4
@@ -665,6 +703,121 @@ From the timbre-based self-similarity matrices a pattern of the song becomes cle
 **Amsterdamned**
 
 Both the timbre-based and chroma-based self-similarity matrices visualize a very repetitive track. It is visible that from 45 sec to 95 sec in the song the same occurs as from 125 sec to 175 sec. But also from 20 sec to 45 sec the track is repeated in 95 sec to 125 sec. This also coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
+
+### Key and chords
+
+```{r}
+YCData %>%
+  ggplot(                     # Set up the plot.
+    aes(
+      x = key_name,
+      y = (stat(count)/sum(stat(count))),
+      fill = mode_name
+    )
+  ) +
+  scale_fill_manual(values = c("#FFDC00", "#7C7B78FF")) +
+  facet_wrap(~Bizzey) +
+  geom_bar() +
+  theme_light() +
+  theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA")) +
+  labs(
+    x = "Key",
+    y = "Amount of tracks",
+    title = "Key comparison tracks Bizzey",
+    fill = "Mode"
+  ) +
+  scale_y_continuous(labels = scales::percent)
+```
+
+
+***
+
+Spotify assigns each track a key that was mainly used according to their feature analysis. In this graph, one can see all the main keys of the tracks before and after Bizzey left the group. There clearly is a difference in the key use after Bizzey leaves. His departure brought way **more tracks in F** both major and minor, and **more tracks in C# major**. Also the graph is more shifted towards the A, A# and B this in the minor of those keys. Most tracks made with Bizzey are played in both G major and minor, however they are tied with a lot of other keys. One can also note how the G minor key is used less often after he left the group.
+
+
+### Shift in Loudness
+
+```{r}
+#YCData %>%
+#  ggplot(aes(x = Bizzey, y = loudness)) +
+#  geom_boxplot()
+```
+
+```{r}
+befor <-
+  YCData %>%
+  filter(YCData$Bizzey == "With") %>%
+  add_audio_analysis()
+after <-
+  YCData %>%
+  filter(YCData$Bizzey == "Without") %>%
+  add_audio_analysis()
+diffBA <-
+  befor %>%
+  mutate(genre = "With") %>%
+  bind_rows(after %>% mutate(genre = "Without"))
+
+rm(befor)
+rm(after)
+```
+
+```{r}
+p6 <- diffBA %>%
+          mutate(
+            timbre =
+              map(
+                segments,
+                compmus_summarise,
+                timbre,
+                method = "mean"
+              )
+          ) %>%
+          select(genre, timbre) %>%
+          compmus_gather_timbre() %>%
+          ggplot(aes(x = basis, y = value, fill = genre)) +
+          geom_boxplot() +
+          scale_fill_viridis_d() +
+          scale_fill_manual(values=c("#7C7B78FF", "#FFCC00")) +
+          theme_light() +
+          labs(x = "Timbre coefficients", y = "", fill = "Bizzey")
+```
+
+```{r}
+p7 <- diffBA %>%
+          mutate(
+            pitches =
+              map(
+                segments,
+                compmus_summarise,
+                pitches,
+                method = "mean", norm = "manhattan"
+              )
+          ) %>%
+          select(genre, pitches) %>%
+          compmus_gather_chroma() %>%
+          ggplot(aes(x = pitch_class, y = value, fill = genre)) +
+          geom_boxplot() +
+          scale_fill_viridis_d() +
+          scale_fill_manual(values=c("#7C7B78FF", "#FFCC00")) +
+          theme_light() +
+          labs(x = "Pitch classes", y = "", fill = "Bizzey")
+```
+
+```{r}
+p6 / p7
+```
+
+
+***
+
+**Timbre coefficients**
+
+In this graph one can hardly distinguish between the two time area of Yellow Claw, c06 and c12 are slightly different after Bizzey left for example. However there is **one big difference**, the variance in c02 which is known as **the loudness of tracks**. Here it is visible that loudness has a range of nearly 100 when Bizzey was still in the band. However after his departure the range nearly doubles as it gets close to a range of 200. 
+
+**Pitch classes**
+
+In this graph.
+
 
 ### The answer
 
