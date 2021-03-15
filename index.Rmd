@@ -309,6 +309,19 @@ key_templates <-
   )
 ```
 
+```{r}
+html_tag_audio <- function(file, type = c("mpeg")) {
+  type <- match.arg(type)
+  htmltools::tags$audio(
+    controls = NA,
+    htmltools::tags$source(
+      src = file,
+      type = glue::glue("audio/{type}", type = type)
+    )
+  )
+}
+```
+
 
 ### *NEW * Tempo
 
@@ -475,64 +488,6 @@ LMF <-
 ```
 
 ```{r}
-LMF %>%
-  mutate(pitches = map(pitches, compmus_normalise, "chebyshev")) %>%
-  compmus_gather_chroma() %>% 
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = pitch_class,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Chromagram Loudest MF") +
-  theme_minimal() +
-  scale_fill_viridis_c(option = 'E') +
-  geom_vline(xintercept = 29,
-             color = "white",
-             size = 0.8) +
-  geom_vline(xintercept = 37,
-             color = "white",
-             size = 0.8) +
-  geom_vline(xintercept = 50,
-             color = "white",
-             size = 0.8) +
-  geom_vline(xintercept = 65,
-             color = "white",
-             size = 0.8) +
-  geom_vline(xintercept = 85,
-             color = "white",
-             size = 0.8) +
-  geom_vline(xintercept = 114,
-             color = "white",
-             size = 0.8) +
-  geom_vline(xintercept = 154,
-             color = "white",
-             size = 0.8)
-#  annotate(geom="text", 
-#          x=89, 
-#          y="A", 
-#          label="First drop",
-#          color="white",
-#          fontface = 2,
-#          hjust=0)
-```
-
-
-***
-
-Here we can see the chromagram of [Loudest MF](https://open.spotify.com/track/34xsvZ1A2Ou1oo1VyOwQG1?si=5xdFXOTaSeWKOmF3pZgbwg), which scored very high on speechiness.
-
-You can see the fade away of sound between 28 and 36 sec as only G# is present which is the muffled tone.
-After this it is clear that there is a distinct beat since it is visible in A/Ab and E/Eb and slightly in C#/C. This until around 50 sec where the rapper starts and the spectrum contains more yellow and thus there are more frequencies present until around 65 sec.
-You can see and hear at 85 sec the second beat drop, with a lot of clean notes being played until 115 sec. Also you can see at 105 sec is where the rapper says 'bounce' a couple of times as the C# is faded in the C. 
-Then the rapper starts again as visible in the amount of present frequencies. At 155 sec the third beat starts decently clean as most is present in G# but around 160 seconds muffled sound is added to the beat and the beat gets more components from then on. However it is still clear that the music fluctuates between high and low. 
-
-
-### A closer look at *Loudest MF*
-```{r}
 bzt <-
   get_tidy_audio_analysis("34xsvZ1A2Ou1oo1VyOwQG1") %>% # Change URI.
   compmus_align(bars, segments) %>%                     # Change `bars`
@@ -552,6 +507,52 @@ bzt <-
         method = "rms", norm = "euclidean"              # Change summary & norm.
       )
   )
+```
+
+```{r}
+p9 <- LMF %>%
+        mutate(pitches = map(pitches, compmus_normalise, "chebyshev")) %>%
+        compmus_gather_chroma() %>% 
+        ggplot(
+          aes(
+            x = start + duration / 2,
+            width = duration,
+            y = pitch_class,
+            fill = value
+          )
+        ) +
+        geom_tile() +
+        labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Chromagram Loudest MF") +
+        theme_minimal() +
+        scale_fill_viridis_c(option = 'E') +
+        geom_vline(xintercept = 29,
+                   color = "white",
+                   size = 0.8) +
+        geom_vline(xintercept = 37,
+                   color = "white",
+                   size = 0.8) +
+        geom_vline(xintercept = 50,
+                   color = "white",
+                   size = 0.8) +
+        geom_vline(xintercept = 65,
+                   color = "white",
+                   size = 0.8) +
+        geom_vline(xintercept = 85,
+                   color = "white",
+                   size = 0.8) +
+        geom_vline(xintercept = 114,
+                   color = "white",
+                   size = 0.8) +
+        geom_vline(xintercept = 154,
+                   color = "white",
+                   size = 0.8)
+      #  annotate(geom="text", 
+      #          x=89, 
+      #          y="A", 
+      #          label="First drop",
+      #          color="white",
+      #          fontface = 2,
+      #          hjust=0)
 ```
 
 ```{r}
@@ -592,13 +593,33 @@ p3 <- bind_rows(
         geom_vline(xintercept = 39,
                    color = "white",
                    size = 0.8)
-
-p3
 ```
+
+```{r, fig.width=10,fig.height=11}
+p9/p3
+```
+
 
 ***
 
-All the points talked about previously in Looking at the Loudest MF are clearly visible in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was not alot of repetition found by Spotify. 
+Here we can see the chromagram and self-similarity matrices of [Loudest MF](https://open.spotify.com/track/34xsvZ1A2Ou1oo1VyOwQG1?si=5xdFXOTaSeWKOmF3pZgbwg), which scored very high on speechiness.
+
+```{r}
+html_tag_audio("https://p.scdn.co/mp3-preview/6a24bcc7c41cc0321640838661f735aa1242ba28?cid=774b29d4f13844c495f206cafdad9c86", type = "mpeg")
+```
+_This is a 30 second sample from the track Loudest MF._
+
+**Chromagram**
+
+You can see the fade away of sound between 28 and 36 sec as only G# is present which is the muffled tone.
+After this it is clear that there is a distinct beat since it is visible in A/Ab and E/Eb and slightly in C#/C. This until around 50 sec where the rapper starts and the spectrum contains more yellow and thus there are more frequencies present until around 65 sec.
+You can see and hear at 85 sec the second beat drop, with a lot of clean notes being played until 115 sec. Also you can see at 105 sec is where the rapper says 'bounce' a couple of times as the C# is faded in the C. 
+Then the rapper starts again as visible in the amount of present frequencies. At 155 sec the third beat starts decently clean as most is present in G# but around 160 seconds muffled sound is added to the beat and the beat gets more components from then on. However it is still clear that the music fluctuates between high and low. 
+
+**Self-similarity matrices**
+
+You can clearly see the most points mentioned above in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was not alot of repetition found by Spotify. 
+
 
 ### Comparing with typical tracks
 ```{r}
@@ -725,9 +746,19 @@ Here two songs are compared to *Loudest MF*, namely [*DJ Turn It Up*](https://op
 
 **DJ Turn It Up**
 
+```{r}
+html_tag_audio("https://p.scdn.co/mp3-preview/6122811334f20e3ec60ecb213a03aafb482127f6?cid=774b29d4f13844c495f206cafdad9c86", type = "mpeg")
+```
+_This is a 30 second sample from the track DJ Turn It Up._
+
 From the timbre-based self-similarity matrices a pattern of the song becomes clear. It is visible that from 20 sec to 95 sec in the song the same occurs as from 95 sec to 160 sec. This coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
 **Amsterdamned**
+
+```{r}
+html_tag_audio("https://p.scdn.co/mp3-preview/b68e4d1b8f85514b6d9d1f47f67b85b6c1e78889?cid=774b29d4f13844c495f206cafdad9c86", type = "mpeg")
+```
+_This is a 30 second sample from the track Amsterdamned._
 
 Both the timbre-based and chroma-based self-similarity matrices visualize a very repetitive track. It is visible that from 45 sec to 95 sec in the song the same occurs as from 125 sec to 175 sec. But also from 20 sec to 45 sec the track is repeated in 95 sec to 125 sec. This also coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
@@ -846,7 +877,7 @@ In this graph one can hardly distinguish between the two time era of Yellow Claw
 
 **Pitch classes**
 
-Yet again one can hardly distinguish between the two time era of Yellow Claw and only a few coefficients are slightly different after Bizzey left for example. These differences are also to small that no conclusions can be drawn from them. However one could argue there is **one difference**, namely **in the C pitch**. It is visible that the range, mean and deviation are different after Bizzey left. 
+Yet again one can hardly distinguish between the two time era of Yellow Claw and only a few coefficients are slightly different after Bizzey left for example. These differences are also to small that no conclusions can be drawn from them. However one could argue there is **one difference**, namely **in the C pitch**. It is visible that the range, mean and deviation of this pitch are different after Bizzey left. 
 
 
 ### The answer
