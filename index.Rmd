@@ -314,14 +314,17 @@ key_templates <-
 
 ```{r}
 p8 <- YCData %>%
-        ggplot(aes(x = tempo, y = stat(count), fill = Label)) +
-        facet_wrap(~Bizzey) +
-        scale_fill_manual(values = c("#00204DFF", "#7C7B78FF", "#FFBC00")) +
-        geom_histogram(binwidth = 10) +
+        ggplot(aes(x = 1, y = tempo, fill = Bizzey, color = Bizzey)) +
+        facet_wrap(~Bizzey, dir = "v") +
+        coord_flip() +
+        scale_fill_manual(values = c("#7C7B78FF", "#FFCC00")) +
+        scale_color_manual(values = c("#7C7B78FF", "#FFCC00")) +
+        geom_violin() +
         theme_light() +
-        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"),
-              legend.position = c(0.13, 0.8)) +
-        labs(title = "Tempo distribution", x = "Tempo", y = "Count", subtitle = "Distributed over the time period with and without Bizzey")
+        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA")) +
+        guides(color = FALSE, fill = FALSE) +
+        labs(title = "Tempo distribution", y = "Tempo", x = "Amount", subtitle = "Distributed over the time period with and without Bizzey") +
+        theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
 ```
 
 ```{r}
@@ -343,11 +346,11 @@ p8
 
 ***
 
+After Bizzey left Yellow Claw had a significant shift in tempo distribution. This is because as is visible in the graph tracks were made with tempo above the 150 bpm. And not just a few tracks, about 35 percent of their new music would be above this previous apparent threshold. 
 
 
 
-
-### Yellow *M F * Claw
+### This is Yellow '*M F *' Claw
 
 [Yellow Claw](https://yellowclaw.com/) has and probably will keep being one of my favorite DJ's. Interestingly enough they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs. It started with three members named Bizzey, Jim Aasgier en Nizzle in 2010. Only Bizzey had experience previous to joining the group, as he released 2 songs under his name in 2006. Since I stuck with the group for so long it was only logical to analyze them. **Did Yellow Claw evolve over time?** Is a very interesting question as a few things happend over the years to the group. To research the question a self-made chronological playlist of all the s
 ongs listed in the Spotify page (except remixes) will be used. 
@@ -375,17 +378,7 @@ These are very typical as they define their past and current style in beat and b
   
 These are all tracks with a very different style then the other tracks made by Yellow Claw. 
 
-### This is Yellow Claw
-
-[The playlist:](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw)
-
-```{r}
-playlistYC <- YCData %>% select(track.name, track.album.release_date)
-                
-datatable(playlistYC, rownames = FALSE, class = "table1",
-          colnames = c('Name', 'Release date'), 
-          options = list(scrollY = "400px", pageLength = 120, paging = FALSE))
-```
+The playlist that will be used can be found [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw).
 
 ### To Bizzey or not to Bizzey? *A-side*
 
@@ -562,44 +555,45 @@ bzt <-
 ```
 
 ```{r}
-bind_rows(
-  bzt %>%
-    compmus_self_similarity(pitches, "manhattan") %>%
-    mutate(d = d / max(d), type = "Chroma-based"),
-  bzt %>%
-    compmus_self_similarity(timbre, "euclidean") %>%
-    mutate(d = d / max(d), type = "Timbre-based")
-) %>%
-  mutate() %>%
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_fixed() +
-  facet_wrap(~type) +
-  scale_fill_viridis_c(option = 'E', guide = "none") +
-  theme_classic() +
-  theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"), strip.text = element_text(color = "white")) +
-  labs(x = "", y = "", title = "Self-similarity matrices of 'Loudest MF'") +
-  geom_vline(xintercept = 153,
-             color = "white",
-             size = 0.8) +
-  geom_vline(xintercept = 114,
-             color = "white",
-             size = 0.8) +
-  geom_vline(xintercept = 86,
-             color = "white",
-             size = 0.8) +
-  geom_vline(xintercept = 39,
-             color = "white",
-             size = 0.8)
+p3 <- bind_rows(
+        bzt %>%
+          compmus_self_similarity(pitches, "manhattan") %>%
+          mutate(d = d / max(d), type = "Chroma-based"),
+        bzt %>%
+          compmus_self_similarity(timbre, "euclidean") %>%
+          mutate(d = d / max(d), type = "Timbre-based")
+      ) %>%
+        mutate() %>%
+        ggplot(
+          aes(
+            x = xstart + xduration / 2,
+            width = xduration,
+            y = ystart + yduration / 2,
+            height = yduration,
+            fill = d
+          )
+        ) +
+        geom_tile() +
+        coord_fixed() +
+        facet_wrap(~type) +
+        scale_fill_viridis_c(option = 'E', guide = "none") +
+        theme_classic() +
+        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"), strip.text = element_text(color = "white")) +
+        labs(x = "", y = "", title = "Self-similarity matrices of 'Loudest MF'") +
+        geom_vline(xintercept = 153,
+                   color = "white",
+                   size = 0.8) +
+        geom_vline(xintercept = 114,
+                   color = "white",
+                   size = 0.8) +
+        geom_vline(xintercept = 86,
+                   color = "white",
+                   size = 0.8) +
+        geom_vline(xintercept = 39,
+                   color = "white",
+                   size = 0.8)
 
+p3
 ```
 
 ***
@@ -649,8 +643,8 @@ bzt3 <-
   )
 ```
 
-```{r, fig.width=10,fig.height=11}
-p3 <- bind_rows(
+```{r}
+p4 <- bind_rows(
         bzt2 %>%
           compmus_self_similarity(pitches, "manhattan") %>%
           mutate(d = d / max(d), type = "Chroma-based"),
@@ -685,7 +679,7 @@ p3 <- bind_rows(
              color = "white",
              size = 0.8)
 
-p4 <- bind_rows(
+p5 <- bind_rows(
         bzt3 %>%
           compmus_self_similarity(pitches, "manhattan") %>%
           mutate(d = d / max(d), type = "Chroma-based"),
@@ -719,13 +713,15 @@ p4 <- bind_rows(
         geom_vline(xintercept = 124,
              color = "white",
              size = 0.8)
+```
 
-p3/p4
+```{r, fig.width=10,fig.height=11}
+p4/p5
 ```
 
 ***
 
-Here two songs are compared to *Loudest MF*, namely [*DJ Turn It Up*](https://open.spotify.com/track/1ivuWgxFQb2xzxVNSlB1hF?si=bftjfytFSw2nOp4MqRPfgQ) and [*Amsterdamned*](https://open.spotify.com/track/5VkKghJxtZV1PHBSvmb2kw?si=Yv86SAoRRjWe6jHYJpscBQ). The first is a typical track that dates back to when Bizzey was still a member of Yellow Claw. Whilst the second is a typical track that was done without Bizzey.
+Here two songs are compared to *Loudest MF*, namely [*DJ Turn It Up*](https://open.spotify.com/track/1ivuWgxFQb2xzxVNSlB1hF?si=bftjfytFSw2nOp4MqRPfgQ) and [*Amsterdamned*](https://open.spotify.com/track/5VkKghJxtZV1PHBSvmb2kw?si=Yv86SAoRRjWe6jHYJpscBQ). The first is a typical track that dates back to when Bizzey was still a member of Yellow Claw. Whilst the second is a typical track that was made without Bizzey.
 
 **DJ Turn It Up**
 
@@ -842,13 +838,15 @@ p6 / p7
 
 ***
 
+*In this section two graphs are computed using lower-level track audio analysis from Spotify. The distinction is again made between the era where Bizzey was a member and the era where he wasn't. *
+
 **Timbre coefficients**
 
-In this graph one can hardly distinguish between the two time area of Yellow Claw, c06 and c12 are slightly different after Bizzey left for example. However there is **one big difference**, the variance in c02 which is known as **the loudness brightness of a track**. Here it is visible that loudness has a range of nearly 100 when Bizzey was still in the band. However after his departure the range nearly doubles as it gets close to a range of 200. 
+In this graph one can hardly distinguish between the two time era of Yellow Claw, a few coefficients are slightly different after Bizzey left for example. But these differences so small that no conclusions can be drawn from them. However there is **one big difference**, the variance in c02 coefficient which is known as **the loudness or brightness of a track**. Here it is visible that the timbre loudness has a range of nearly 100 when Bizzey was still in the band. However after his departure **the range nearly doubles** as it gets close to a range of 200.
 
 **Pitch classes**
 
-In this graph.
+Yet again one can hardly distinguish between the two time era of Yellow Claw and only a few coefficients are slightly different after Bizzey left for example. These differences are also to small that no conclusions can be drawn from them. However one could argue there is **one difference**, namely **in the C pitch**. It is visible that the range, mean and deviation are different after Bizzey left. 
 
 
 ### The answer
