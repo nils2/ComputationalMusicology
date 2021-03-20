@@ -393,6 +393,8 @@ These are all tracks with a very different style then the other tracks made by Y
 
 The playlist that will be used can be found [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw).
 
+<iframe src="https://open.spotify.com/embed/playlist/4ihYAvvARSvL4yUzdibPrd" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media" userAgent=""></iframe>
+
 ### To Bizzey or not to Bizzey? *A-side*
 
 ```{r First Plot, echo=FALSE}
