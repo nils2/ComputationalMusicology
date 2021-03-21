@@ -347,7 +347,7 @@ html_tag_audio <- function(file, type = c("mpeg")) {
 ```
 
 
-### *NEW * **Data analitics** {data-commentary-width=800}
+### *NEW * **Analytically grouping the differences** {data-commentary-width=800}
 
 ```{r}
 befor <-
@@ -430,8 +430,8 @@ indie_forest <-
 ```
 
 ```{r}
-# indie_knn %>% get_pr()
-# indie_knn %>% get_conf_mat() %>% autoplot(type = "mosaic")
+# indie_forest %>% get_pr()
+# indie_forest %>% get_conf_mat() %>% autoplot(type = "heatmap")
 ```
 
 ```{r}
@@ -465,10 +465,10 @@ p13 <- ggplot() +
             fill = "#FFDC00") +
   geom_rect(aes(xmin = 6.2, xmax = 15, ymin = 12.2, ymax = 15), 
             fill = "#00204DFF") +
-  annotate(geom = "text", y= 10, x = 2.4, label = "30", color = "white", fontface = 2, hjust= 0) +
-  annotate(geom = "text", y= 2.3, x = 2.4, label = "14", color = "white", fontface = 2, hjust= 0) +
-  annotate(geom = "text", y= 13.5, x = 9.8, label = "12", color = "white", fontface = 2, hjust= 0) +
-  annotate(geom = "text", y= 6, x = 9.8, label = "59", color = "black", fontface = 2, hjust= 0) +
+  annotate(geom = "text", y= 10, x = 2.4, label = "29", color = "white", fontface = 2, hjust= 0) +
+  annotate(geom = "text", y= 2.3, x = 2.4, label = "15", color = "white", fontface = 2, hjust= 0) +
+  annotate(geom = "text", y= 13.5, x = 9.8, label = "8", color = "white", fontface = 2, hjust= 0) +
+  annotate(geom = "text", y= 6, x = 9.8, label = "63", color = "black", fontface = 2, hjust= 0) +
   annotate(geom = "text", y= 10, x = -3.5, label = "With", color = "black", fontface = 1, hjust= 0) +
   annotate(geom = "text", y= 2.5, x = -5.2, label = "Without", color = "black", fontface = 1, hjust= 0) +
   annotate(geom = "text", y= -1, x = 2, label = "With", color = "black", fontface = 1, hjust= 0) +
@@ -483,11 +483,40 @@ p13 <- ggplot() +
 ```{r}
 p12 + p13
 ```
+```{r}
+# indie_features %>%
+#   ggplot(aes(x = c02, y = c07, colour = playlist, size = tempo)) +
+#   geom_point(alpha = 0.8) +
+#   scale_color_manual(values = c("#7C7B78FF", "#FFBC00")) +
+#   labs(
+#     x = "Timbre Component 1",
+#     y = "Timbre Component 2",
+#     size = "Energy",
+#     colour = "Playlist"
+#   )
+```
 
 
 ***
 
 Random forest is beast?
+
+Before:
+
+| Bizzey     | Precision     | Recall    |
+|------------|---------------|-----------|
+| With       | 0.7           | 0.471     |
+| Without    | 0.729         | 0.873     |
+
+
+After:
+
+| Bizzey     | Precision     | Recall    |
+|------------|---------------|-----------|
+| With       | 0.784         | 0.659     |
+| Without    | 0.808         | 0.887     |
+
+
 
 ### **This is Yellow '_M F _' Claw** {data-commentary-width=1100}
 
@@ -495,32 +524,37 @@ Random forest is beast?
 
 ***
 
-[Yellow Claw](https://yellowclaw.com/) has and probably will keep being one of my favorite DJ's. Interestingly enough they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs. It started with three members named Bizzey, Jim Aasgier en Nizzle in 2010. Only Bizzey had experience previous to joining the group, as he released 2 songs under his name in 2006. Since I stuck with the group for so long it was only logical to analyze them. **Did Yellow Claw evolve over time?** Is a very interesting question as a few things happend over the years to the group. To research the question a self-made chronological playlist of all the songs listed in the Spotify page (except remixes) will be used. 
+[Yellow Claw](https://yellowclaw.com/) has and probably will keep being one of my favorite DJ's. Interestingly enough they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs. It started with three members named Bizzey, Jim Aasgier en Nizzle in 2010. Only Bizzey had experience previous to joining the group, as he released 2 songs under his name in 2006. Since I stuck with the group for so long it was only logical to analyze them. I will do this using the following questions:
 
-Personally I expect they changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the Mad Decent, which is Diplo's recordlabel. However most likely the biggest change occurred in 2016 when Bizzey left the group to spend more time with his family. His main job was the MC, or master of ceremonies, which is used as an alternative indication for rappers or performing artists.
+* **Did Yellow Claw evolve over time?**
+* **Can we pick up on these possible changes using the Spotify API?**
 
-However there might not be a big change at all. Since they have only been active for 11 years of which they spend only 9 producing their own songs and half was spend with and the other without Bizzey. This might barely be enough or fall short of enough time, especially since the 2021 songs are rather different than the others before. 
+A few things happened over the years to the group so it will be interesting to find out if they changed due to them. To properly research these questions a self-made chronological playlist of all the songs listed in the Spotify page (except remixes) will be used, this was needed as the 'This is' Spotify playlist was not representative. 
+
+Personally I expect they have changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the [Mad Decent](https://en.wikipedia.org/wiki/Mad_Decent), which is [Diplo's](https://en.wikipedia.org/wiki/Diplo) (a very famous DJ) recordlabel. However most likely the biggest change occurred in 2016 when Bizzey left the group to spend more time with his family. His main job was the MC, or master of ceremonies, which is used as an alternative indication for rappers or performing artists.
+
+The possibility remains that there might not be a big change at all. Since they have only been active for 11 years of which they spend only 9 producing their own songs and half was spend with and the other without Bizzey. In this time frame they released four albums and a total of 115 tracks. However the amount of tracks and the time as a group are relatively small compared to artists known to have gone through different phases, such as Madonna or Cher. This means it is possible that we might not be able to discover a change due to little data, especially since the 2021 songs are rather different than the others before. Let's  not dwell on the possibilities and have a look at some of the more typical and atypical tracks they have made over the years.
 
 **Typical tracks:**
 
-* Thunder
-* Shotgun
-    + Most popular youtube video with 186 million views.
+* Amsterdamned
 * DJ Turn It Up
     + Most popular spotify song with 167 million plays. 
+* Shotgun
+    + Most popular youtube video with 186 million views.
 
 These are very typical as they define their past and current style in beat and beatdrop.
 
 **Atypical tracks:**
     
-* P*\$\$YRICH
 * Another Life
 * Kiss Your Lips
     + This one is very strange as it is happy hardcore, a genre that does not suit Yellow Claw's style nor do they have any similar songs.
+* P*\$\$YRICH
   
 These are all tracks with a very different style then the other tracks made by Yellow Claw. 
 
-The playlist that will be used can be found [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw).
+If you are interested you can check out their tracks right [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw). But for now let's try to discover if they have changed.
 
 ### **To Bizzey or not to Bizzey?** *A-side* {data-commentary-width=800}
 
@@ -552,6 +586,8 @@ ggplotly(p1, tooltip = "text") %>%
 ```
 
 ***
+
+
 
 This plot shows the **difference in speechiness and liveness** in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would **expect the departure of a MC to decrease the speechiness** of produced songs, but this is **not the case** here. One would expect it because rap music is indicated by Spotify to have a speechiness between 0.33 and 0.66. While values above 0.66 are indicated to describe tracks that are probably made entirely of spoken words, and values below 0.33 most likely represent music and other non-speech-like tracks. Therefore the low values are suprizing altogether but an MC, or rapper, leaving leading to an increase in the mean is at least to be called peculiar. One can also note an **increase in liveness** in songs after Bizzey left, whilst none of the songs are life performances. Eventhough none of the songs pass the 0.8 barrier set by Spotify to qualify as a live recording, but it can indicate a change to the music. This since clearly the algorithm notices something different to indicate the higher liveness.
 
@@ -751,7 +787,7 @@ Then the rapper starts again as visible in the amount of present frequencies. At
 You can clearly see the most points mentioned above in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was not alot of repetition found by Spotify. 
 
 
-### **Comparing with typical tracks** {data-commentary-width=800}
+### **What about some typical tracks** {data-commentary-width=800}
 
 ```{r}
 bzt2 <-
@@ -893,7 +929,7 @@ _This is a 30 second sample from the track Amsterdamned._
 
 Both the timbre-based and chroma-based self-similarity matrices visualize a very repetitive track. It is visible that from 45 sec to 95 sec in the song the same occurs as from 125 sec to 175 sec. But also from 20 sec to 45 sec the track is repeated in 95 sec to 125 sec. This also coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
-### **What's the Key?** {data-commentary-width=800}
+### **What's the Key to success?** {data-commentary-width=800}
 
 ```{r}
 YCData %>%
@@ -1013,7 +1049,7 @@ In this graph one can hardly distinguish between the two time era of Yellow Claw
 
 Yet again one can hardly distinguish between the two time era of Yellow Claw and only a few coefficients are slightly different after Bizzey left for example. These differences are also to small that no conclusions can be drawn from them. However one could argue there is **one difference**, namely **in the C pitch**. It is visible that the range, mean and deviation of this pitch are different after Bizzey left. 
 
-### **Too loud and slow** {data-commentary-width=800}
+### **Selfreflection Too loud and slow** {data-commentary-width=800}
 
 ```{r}
 p8 <- YCData %>%
@@ -1080,6 +1116,8 @@ After Bizzey left Yellow Claw had a significant shift in tempo distribution. Thi
 The loundess decreased after bizzey left. 
 
 
-### **The answer**
+### **A new Yellow Claw without Bizzey**
+
+Yes they have changed.
 
 404 Not found: Due to the research being incomplete we are not yet able to find an answer.
