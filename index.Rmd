@@ -49,6 +49,30 @@ library(patchwork)
 library(cowplot)
 ```
 
+```{r Load packages2, message=FALSE, echo=FALSE}
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
+library(kknn)
+library(C50)
+
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit %>% 
+    collect_predictions() %>% 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
+
+get_pr <- function(fit) {
+  fit %>% 
+    conf_mat_resampled() %>% 
+    group_by(Prediction) %>% mutate(precision = Freq / sum(Freq)) %>% 
+    group_by(Truth) %>% mutate(recall = Freq / sum(Freq)) %>% 
+    ungroup() %>% filter(Prediction == Truth) %>% 
+    select(class = Prediction, precision, recall)
+} 
+```
+
 ```{r Load Playlist, echo=FALSE}
 YCData <- get_playlist_audio_features("", "4ihYAvvARSvL4yUzdibPrd")
 ```
@@ -323,50 +347,155 @@ html_tag_audio <- function(file, type = c("mpeg")) {
 ```
 
 
-### *NEW * Tempo
+### *NEW * Data analitics {data-commentary-width=800}
 
 ```{r}
-p8 <- YCData %>%
-        ggplot(aes(x = 1, y = tempo, fill = Bizzey, color = Bizzey)) +
-        facet_wrap(~Bizzey, dir = "v") +
-        coord_flip() +
-        scale_fill_manual(values = c("#7C7B78FF", "#FFCC00")) +
-        scale_color_manual(values = c("#7C7B78FF", "#FFCC00")) +
-        geom_violin() +
-        theme_light() +
-        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA")) +
-        guides(color = FALSE, fill = FALSE) +
-        labs(title = "Tempo distribution", y = "Tempo", x = "Amount", subtitle = "Distributed over the time period with and without Bizzey") +
-        theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
+befor <-
+  YCData %>%
+  filter(YCData$Bizzey == "With")
+after <-
+  YCData %>%
+  filter(YCData$Bizzey == "Without")
+diffBA_audio <-
+  bind_rows(
+    befor %>% mutate(playlist = "With"),
+    after %>% mutate(playlist = "Without")
+  )
+
+rm(befor)
+rm(after)
+
+```
+
+
+```{r}
+indie_features <-
+  diffBA_audio %>%  # For your portfolio, change this to the name of your corpus.
+  add_audio_analysis() %>% 
+  mutate(
+    playlist = factor(playlist),
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(
+        segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean",
+      )
+  ) %>%
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
+  mutate_at(vars(pitches, timbre), map, bind_rows) %>%
+  unnest(cols = c(pitches, timbre))
 ```
 
 ```{r}
-#p9 <- YCData %>%
-#        ggplot(aes(Bizzey, tempo, fill = Bizzey, color = Bizzey)) +
-#        scale_fill_manual(values = c("#7C7B78FF", "#FFCC00")) +
-#        scale_color_manual(values = c("#7C7B78FF", "#FFCC00")) +
-#        geom_violin() +
-#        theme_light() +
-#        theme(strip.background = element_rect(fill="#7C7B78FF")) +
-#        guides(color = FALSE, fill = FALSE) +
-#        labs(y = "Tempo")
+indie_recipe <-
+  recipe(
+    playlist ~
+      loudness +
+      acousticness +
+      tempo +
+      duration +
+      c02 + c04 +
+      c07 + c08 + c10 + c11 + c12,
+    data = indie_features,          # Use the same name as the previous block.
+  ) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())      # Converts to z-scores.
+  #step_range(all_predictors())    # Sets range to [0, 1].
 ```
 
 ```{r}
-p8
+indie_cv <- indie_features %>% vfold_cv(10)
+```
+
+```{r}
+forest_model <-
+  rand_forest() %>%
+  set_mode("classification") %>% 
+  set_engine("ranger", importance = "impurity")
+indie_forest <- 
+  workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit_resamples(
+    indie_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+```
+
+```{r}
+# indie_knn %>% get_pr()
+# indie_knn %>% get_conf_mat() %>% autoplot(type = "mosaic")
+```
+
+```{r}
+p12 <- workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit(indie_features) %>% 
+  pluck("fit", "fit", "fit") %>%
+  ranger::importance() %>% 
+  enframe() %>% 
+  mutate(name = fct_reorder(name, value)) %>% 
+  ggplot(aes(name, value, fill = name)) + 
+  scale_fill_manual(values = c("#00204DFF", "#193256", "#32445F", "#4A5767", 
+                               "#63696F","#7C7B78FF", "#968E60", 
+                               "#B0A248", "#CBB530", "#E5C918", "#FFDC00")) +
+  geom_col() + 
+  coord_flip() +
+  theme_minimal() +
+  theme(line = element_blank()) +
+  guides(fill = FALSE) +
+  labs(x = "Features", y = "Importance", title = "Importance of features used \n in Random Forest")
+```
+
+```{r}
+p13 <- ggplot() +
+  geom_rect(aes(xmin = 0, xmax = 6.1, ymin = 4.4, ymax = 15), 
+            fill = "#7C7B78FF") +
+  geom_rect(aes(xmin = 0, xmax = 6.1, ymin = 0, ymax = 4.3), 
+            fill = "#00204DFF") +
+  geom_rect(aes(xmin = 6.2, xmax = 15, ymin = 0, ymax = 12.1), 
+            fill = "#FFDC00") +
+  geom_rect(aes(xmin = 6.2, xmax = 15, ymin = 12.2, ymax = 15), 
+            fill = "#00204DFF") +
+  annotate(geom = "text", y= 10, x = 2.4, label = "30", color = "white", fontface = 2, hjust= 0) +
+  annotate(geom = "text", y= 2.3, x = 2.4, label = "14", color = "white", fontface = 2, hjust= 0) +
+  annotate(geom = "text", y= 13.5, x = 9.8, label = "12", color = "white", fontface = 2, hjust= 0) +
+  annotate(geom = "text", y= 6, x = 9.8, label = "59", color = "black", fontface = 2, hjust= 0) +
+  annotate(geom = "text", y= 10, x = -3.5, label = "With", color = "black", fontface = 1, hjust= 0) +
+  annotate(geom = "text", y= 2.5, x = -5.2, label = "Without", color = "black", fontface = 1, hjust= 0) +
+  annotate(geom = "text", y= -1, x = 2, label = "With", color = "black", fontface = 1, hjust= 0) +
+  annotate(geom = "text", y= -1, x = 8.5, label = "Without", color = "black", fontface = 1, hjust= 0) +
+  theme_minimal() +
+  theme(strip.background = element_rect(fill="#7C7B78FF"), line = element_blank(), 
+        axis.text.y=element_blank(), axis.ticks.y=element_blank(), 
+        axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+  labs(title = "Confusion matrix", x= "Truth", y= "Prediction")
+```
+
+```{r}
+p12 + p13
 ```
 
 
 ***
 
-After Bizzey left Yellow Claw had a significant shift in tempo distribution. This is because as is visible in the graph tracks were made with tempo above the 150 bpm. And not just a few tracks, about 35 percent of their new music would be above this previous apparent threshold. 
+Random forest is beast?
 
+### This is Yellow '*M F *' Claw {data-commentary-width=1100}
 
+![](https://i.scdn.co/image/ab67706f00000003f4c5d8831a7da0edad440464)
 
-### This is Yellow '*M F *' Claw
+***
 
-[Yellow Claw](https://yellowclaw.com/) has and probably will keep being one of my favorite DJ's. Interestingly enough they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs. It started with three members named Bizzey, Jim Aasgier en Nizzle in 2010. Only Bizzey had experience previous to joining the group, as he released 2 songs under his name in 2006. Since I stuck with the group for so long it was only logical to analyze them. **Did Yellow Claw evolve over time?** Is a very interesting question as a few things happend over the years to the group. To research the question a self-made chronological playlist of all the s
-ongs listed in the Spotify page (except remixes) will be used. 
+[Yellow Claw](https://yellowclaw.com/) has and probably will keep being one of my favorite DJ's. Interestingly enough they are not the most famous Dutch DJ, but among peers they are known for having very nostalgic and good songs. It started with three members named Bizzey, Jim Aasgier en Nizzle in 2010. Only Bizzey had experience previous to joining the group, as he released 2 songs under his name in 2006. Since I stuck with the group for so long it was only logical to analyze them. **Did Yellow Claw evolve over time?** Is a very interesting question as a few things happend over the years to the group. To research the question a self-made chronological playlist of all the songs listed in the Spotify page (except remixes) will be used. 
 
 Personally I expect they changed, this could be backed up by the fact that their first songs differ in quality from their first album (released in 2015). This is most likely because their first album was released under the Mad Decent, which is Diplo's recordlabel. However most likely the biggest change occurred in 2016 when Bizzey left the group to spend more time with his family. His main job was the MC, or master of ceremonies, which is used as an alternative indication for rappers or performing artists.
 
@@ -393,9 +522,7 @@ These are all tracks with a very different style then the other tracks made by Y
 
 The playlist that will be used can be found [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw).
 
-<iframe src="https://open.spotify.com/embed/playlist/4ihYAvvARSvL4yUzdibPrd" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media" userAgent=""></iframe>
-
-### To Bizzey or not to Bizzey? *A-side*
+### To Bizzey or not to Bizzey? *A-side* {data-commentary-width=800}
 
 ```{r First Plot, echo=FALSE}
 p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness, 
@@ -428,7 +555,7 @@ ggplotly(p1, tooltip = "text") %>%
 
 This plot shows the **difference in speechiness and liveness** in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would **expect the departure of a MC to decrease the speechiness** of produced songs, but this is **not the case** here. One would expect it because rap music is indicated by Spotify to have a speechiness between 0.33 and 0.66. While values above 0.66 are indicated to describe tracks that are probably made entirely of spoken words, and values below 0.33 most likely represent music and other non-speech-like tracks. Therefore the low values are suprizing altogether but an MC, or rapper, leaving leading to an increase in the mean is at least to be called peculiar. One can also note an **increase in liveness** in songs after Bizzey left, whilst none of the songs are life performances. Eventhough none of the songs pass the 0.8 barrier set by Spotify to qualify as a live recording, but it can indicate a change to the music. This since clearly the algorithm notices something different to indicate the higher liveness.
 
-### To Bizzey or not to Bizzey? *B-side*
+### To Bizzey or not to Bizzey? *B-side* {data-commentary-width=800}
 
 ```{r echo=FALSE}
 # Possible interesting comparisons
@@ -479,7 +606,7 @@ This plot shows the difference in acousticness and liveness in the time Bizzey w
 #            geom_segment(aes(xend = 0, yend = track.name), size = 2)
 ```
 
-### Looking at the *Loudest MF*
+### Looking at the *Loudest MF* {data-commentary-width=800}
 
 ```{r}
 LMF <-
@@ -526,6 +653,7 @@ p9 <- LMF %>%
         geom_tile() +
         labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Chromagram Loudest MF") +
         theme_minimal() +
+        theme(panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank()) +
         scale_fill_viridis_c(option = 'E') +
         geom_vline(xintercept = 29,
                    color = "white",
@@ -623,7 +751,8 @@ Then the rapper starts again as visible in the amount of present frequencies. At
 You can clearly see the most points mentioned above in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was not alot of repetition found by Spotify. 
 
 
-### Comparing with typical tracks
+### Comparing with typical tracks {data-commentary-width=800}
+
 ```{r}
 bzt2 <-
   get_tidy_audio_analysis("1ivuWgxFQb2xzxVNSlB1hF") %>% # Change URI.
@@ -764,7 +893,7 @@ _This is a 30 second sample from the track Amsterdamned._
 
 Both the timbre-based and chroma-based self-similarity matrices visualize a very repetitive track. It is visible that from 45 sec to 95 sec in the song the same occurs as from 125 sec to 175 sec. But also from 20 sec to 45 sec the track is repeated in 95 sec to 125 sec. This also coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
-### What's the Key?
+### What's the Key? {data-commentary-width=800}
 
 ```{r}
 YCData %>%
@@ -780,7 +909,8 @@ YCData %>%
   geom_bar() +
   theme_light() +
   theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA"),
-        legend.position = c(0.1, 0.85)) +
+        legend.position = c(0.1, 0.85), panel.grid.major.x = element_blank(), 
+        panel.grid.minor.x = element_blank()) +
   labs(
     x = "Key",
     y = "Amount of tracks",
@@ -795,7 +925,7 @@ YCData %>%
 Spotify assigns each track a key that was mainly used according to their feature analysis. In this graph, one can see all the main keys of the tracks before and after Bizzey left the group. There clearly is a difference in the key use after Bizzey leaves. His departure brought way **more tracks in F** both major and minor, and **more tracks in C# major**. Also the graph is more shifted towards the A, A# and B this in the minor of those keys. Most tracks made with Bizzey are played in both G major and minor, however they are tied with a lot of other keys. One can also note how the G minor key is used less often after he left the group.
 
 
-### A shift in Style?
+### A shift in Style? {data-commentary-width=800}
 
 ```{r}
 #YCData %>%
@@ -839,7 +969,8 @@ p6 <- diffBA %>%
           scale_fill_viridis_d() +
           scale_fill_manual(values=c("#7C7B78FF", "#FFCC00")) +
           theme_light() +
-          theme(legend.position = c(0.50, 0.85), legend.direction = "horizontal") +
+          theme(legend.position = c(0.50, 0.85), legend.direction = "horizontal",
+                panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank()) +
           labs(x = "Timbre coefficients", y = "", fill = "Bizzey", title = "Lower-level audio analysis")
 ```
 
@@ -861,7 +992,8 @@ p7 <- diffBA %>%
           scale_fill_viridis_d() +
           scale_fill_manual(values=c("#7C7B78FF", "#FFCC00")) +
           theme_light() +
-          theme(legend.position = "none") +
+          theme(legend.position = "none",
+                panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank()) +
           labs(x = "Pitch classes", y = "", fill = "Bizzey")
 ```
 
@@ -880,6 +1012,72 @@ In this graph one can hardly distinguish between the two time era of Yellow Claw
 **Pitch classes**
 
 Yet again one can hardly distinguish between the two time era of Yellow Claw and only a few coefficients are slightly different after Bizzey left for example. These differences are also to small that no conclusions can be drawn from them. However one could argue there is **one difference**, namely **in the C pitch**. It is visible that the range, mean and deviation of this pitch are different after Bizzey left. 
+
+### Too loud and slow {data-commentary-width=800}
+
+```{r}
+p8 <- YCData %>%
+        ggplot(aes(x = 1, y = tempo, fill = Bizzey, color = Bizzey)) +
+        facet_wrap(~Bizzey, dir = "v") +
+        coord_flip() +
+        scale_fill_manual(values = c("#7C7B78FF", "#FFCC00")) +
+        scale_color_manual(values = c("#7C7B78FF", "#FFCC00")) +
+        geom_violin(width=1, alpha = 0.4) +
+        geom_boxplot(width=0.15, color="black", alpha = 0.7) +
+        theme_light() +
+        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA")) +
+        guides(color = FALSE, fill = FALSE) +
+        labs(title = "Tempo distribution", y = "Tempo", x = "Amount") +
+        theme(axis.text.y=element_blank(), axis.ticks.y=element_blank(),
+              panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank())
+```
+
+```{r}
+p10 <- YCData %>%
+        ggplot(aes(x = 1, y = loudness, fill = Bizzey, color = Bizzey)) +
+        facet_wrap(~Bizzey, dir = "v") +
+        coord_flip() +
+        scale_fill_manual(values = c("#7C7B78FF", "#FFCC00")) +
+        scale_color_manual(values = c("#7C7B78FF", "#FFCC00")) +
+        geom_violin(width=1, alpha = 0.4) +
+        geom_boxplot(width=0.15, color="black", alpha = 0.7) +
+        theme_light() +
+        theme(strip.background = element_rect(fill="#7C7B78FF", color = "NA")) +
+        guides(color = FALSE, fill = FALSE) +
+        labs(title = "Loudness distribution", y = "Loudness", x = "Amount") +
+        theme(axis.title.y=element_blank(),axis.text.y=element_blank(), axis.ticks.y=element_blank(), 
+              panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank())
+```
+
+```{r}
+#p9 <- YCData %>%
+#        ggplot(aes(Bizzey, tempo, fill = Bizzey, color = Bizzey)) +
+#        scale_fill_manual(values = c("#7C7B78FF", "#FFCC00")) +
+#        scale_color_manual(values = c("#7C7B78FF", "#FFCC00")) +
+#        geom_violin() +
+#        theme_light() +
+#        theme(strip.background = element_rect(fill="#7C7B78FF")) +
+#        guides(color = FALSE, fill = FALSE) +
+#        labs(y = "Tempo")
+```
+
+```{r}
+p8 + p10
+```
+
+
+***
+
+_Both plots are distributed over the time period with and without Bizzey_
+
+**Tempo distribution**
+
+After Bizzey left Yellow Claw had a significant shift in tempo distribution. This is because as is visible in the graph tracks were made with tempo above the 150 bpm. And not just a few tracks, almost half of their new music would be above this previous apparent threshold. 
+
+
+**Loudness distribution**
+
+The loundess decreased after bizzey left. 
 
 
 ### The answer
