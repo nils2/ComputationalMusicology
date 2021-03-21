@@ -347,86 +347,86 @@ html_tag_audio <- function(file, type = c("mpeg")) {
 ```
 
 
-### *NEW * **Analytically grouping the differences** {data-commentary-width=800}
+### *NEW * **Analyzing the differences** {data-commentary-width=800}
 
 ```{r}
-befor <-
-  YCData %>%
-  filter(YCData$Bizzey == "With")
-after <-
-  YCData %>%
-  filter(YCData$Bizzey == "Without")
-diffBA_audio <-
-  bind_rows(
-    befor %>% mutate(playlist = "With"),
-    after %>% mutate(playlist = "Without")
-  )
-
-rm(befor)
-rm(after)
+# befor <-
+#   YCData %>%
+#   filter(YCData$Bizzey == "With")
+# after <-
+#   YCData %>%
+#   filter(YCData$Bizzey == "Without")
+# diffBA_audio <-
+#   bind_rows(
+#     befor %>% mutate(playlist = "With"),
+#     after %>% mutate(playlist = "Without")
+#   )
+# 
+# rm(befor)
+# rm(after)
 
 ```
 
 
 ```{r}
-indie_features <-
-  diffBA_audio %>%  # For your portfolio, change this to the name of your corpus.
-  add_audio_analysis() %>% 
-  mutate(
-    playlist = factor(playlist),
-    segments = map2(segments, key, compmus_c_transpose),
-    pitches =
-      map(
-        segments,
-        compmus_summarise, pitches,
-        method = "mean", norm = "manhattan"
-      ),
-    timbre =
-      map(
-        segments,
-        compmus_summarise, timbre,
-        method = "mean",
-      )
-  ) %>%
-  mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
-  mutate_at(vars(pitches, timbre), map, bind_rows) %>%
-  unnest(cols = c(pitches, timbre))
+# indie_features <-
+#   diffBA_audio %>%  # For your portfolio, change this to the name of your corpus.
+#   add_audio_analysis() %>% 
+#   mutate(
+#     playlist = factor(playlist),
+#     segments = map2(segments, key, compmus_c_transpose),
+#     pitches =
+#       map(
+#         segments,
+#         compmus_summarise, pitches,
+#         method = "mean", norm = "manhattan"
+#       ),
+#     timbre =
+#       map(
+#         segments,
+#         compmus_summarise, timbre,
+#         method = "mean",
+#       )
+#   ) %>%
+#   mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
+#   mutate_at(vars(pitches, timbre), map, bind_rows) %>%
+#   unnest(cols = c(pitches, timbre))
 ```
 
 ```{r}
-indie_recipe <-
-  recipe(
-    playlist ~
-      loudness +
-      acousticness +
-      tempo +
-      duration +
-      c02 + c04 +
-      c07 + c08 + c10 + c11 + c12,
-    data = indie_features,          # Use the same name as the previous block.
-  ) %>%
-  step_center(all_predictors()) %>%
-  step_scale(all_predictors())      # Converts to z-scores.
-  #step_range(all_predictors())    # Sets range to [0, 1].
+# indie_recipe <-
+#   recipe(
+#     playlist ~
+#       loudness +
+#       acousticness +
+#       tempo +
+#       duration +
+#       c02 + c04 +
+#       c07 + c08 + c10 + c11 + c12,
+#     data = indie_features,          # Use the same name as the previous block.
+#   ) %>%
+#   step_center(all_predictors()) %>%
+#   step_scale(all_predictors())      # Converts to z-scores.
+#   #step_range(all_predictors())    # Sets range to [0, 1].
 ```
 
 ```{r}
-indie_cv <- indie_features %>% vfold_cv(10)
+# indie_cv <- indie_features %>% vfold_cv(10)
 ```
 
 ```{r}
-forest_model <-
-  rand_forest() %>%
-  set_mode("classification") %>% 
-  set_engine("ranger", importance = "impurity")
-indie_forest <- 
-  workflow() %>% 
-  add_recipe(indie_recipe) %>% 
-  add_model(forest_model) %>% 
-  fit_resamples(
-    indie_cv, 
-    control = control_resamples(save_pred = TRUE)
-  )
+# forest_model <-
+#   rand_forest() %>%
+#   set_mode("classification") %>% 
+#   set_engine("ranger", importance = "impurity")
+# indie_forest <- 
+#   workflow() %>% 
+#   add_recipe(indie_recipe) %>% 
+#   add_model(forest_model) %>% 
+#   fit_resamples(
+#     indie_cv, 
+#     control = control_resamples(save_pred = TRUE)
+#   )
 ```
 
 ```{r}
@@ -435,54 +435,55 @@ indie_forest <-
 ```
 
 ```{r}
-p12 <- workflow() %>% 
-  add_recipe(indie_recipe) %>% 
-  add_model(forest_model) %>% 
-  fit(indie_features) %>% 
-  pluck("fit", "fit", "fit") %>%
-  ranger::importance() %>% 
-  enframe() %>% 
-  mutate(name = fct_reorder(name, value)) %>% 
-  ggplot(aes(name, value, fill = name)) + 
-  scale_fill_manual(values = c("#00204DFF", "#193256", "#32445F", "#4A5767", 
-                               "#63696F","#7C7B78FF", "#968E60", 
-                               "#B0A248", "#CBB530", "#E5C918", "#FFDC00")) +
-  geom_col() + 
-  coord_flip() +
-  theme_minimal() +
-  theme(line = element_blank()) +
-  guides(fill = FALSE) +
-  labs(x = "Features", y = "Importance", title = "Importance of features used \n in Random Forest")
+# p12 <- workflow() %>% 
+#   add_recipe(indie_recipe) %>% 
+#   add_model(forest_model) %>% 
+#   fit(indie_features) %>% 
+#   pluck("fit", "fit", "fit") %>%
+#   ranger::importance() %>% 
+#   enframe() %>% 
+#   mutate(name = fct_reorder(name, value)) %>% 
+#   ggplot(aes(name, value, fill = name)) + 
+#   scale_fill_manual(values = c("#00204DFF", "#193256", "#32445F", "#4A5767", 
+#                                "#63696F","#7C7B78FF", "#968E60", 
+#                                "#B0A248", "#CBB530", "#E5C918", "#FFDC00")) +
+#   geom_col() + 
+#   coord_flip() +
+#   theme_minimal() +
+#   theme(line = element_blank()) +
+#   guides(fill = FALSE) +
+#   labs(x = "Features", y = "Importance", title = "Importance of features used \n in Random Forest")
 ```
 
 ```{r}
-p13 <- ggplot() +
-  geom_rect(aes(xmin = 0, xmax = 6.1, ymin = 4.4, ymax = 15), 
-            fill = "#7C7B78FF") +
-  geom_rect(aes(xmin = 0, xmax = 6.1, ymin = 0, ymax = 4.3), 
-            fill = "#00204DFF") +
-  geom_rect(aes(xmin = 6.2, xmax = 15, ymin = 0, ymax = 12.1), 
-            fill = "#FFDC00") +
-  geom_rect(aes(xmin = 6.2, xmax = 15, ymin = 12.2, ymax = 15), 
-            fill = "#00204DFF") +
-  annotate(geom = "text", y= 10, x = 2.4, label = "29", color = "white", fontface = 2, hjust= 0) +
-  annotate(geom = "text", y= 2.3, x = 2.4, label = "15", color = "white", fontface = 2, hjust= 0) +
-  annotate(geom = "text", y= 13.5, x = 9.8, label = "8", color = "white", fontface = 2, hjust= 0) +
-  annotate(geom = "text", y= 6, x = 9.8, label = "63", color = "black", fontface = 2, hjust= 0) +
-  annotate(geom = "text", y= 10, x = -3.5, label = "With", color = "black", fontface = 1, hjust= 0) +
-  annotate(geom = "text", y= 2.5, x = -5.2, label = "Without", color = "black", fontface = 1, hjust= 0) +
-  annotate(geom = "text", y= -1, x = 2, label = "With", color = "black", fontface = 1, hjust= 0) +
-  annotate(geom = "text", y= -1, x = 8.5, label = "Without", color = "black", fontface = 1, hjust= 0) +
-  theme_minimal() +
-  theme(strip.background = element_rect(fill="#7C7B78FF"), line = element_blank(), 
-        axis.text.y=element_blank(), axis.ticks.y=element_blank(), 
-        axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-  labs(title = "Confusion matrix", x= "Truth", y= "Prediction")
+# p13 <- ggplot() +
+#   geom_rect(aes(xmin = 0, xmax = 6.1, ymin = 4.4, ymax = 15), 
+#             fill = "#7C7B78FF") +
+#   geom_rect(aes(xmin = 0, xmax = 6.1, ymin = 0, ymax = 4.3), 
+#             fill = "#00204DFF") +
+#   geom_rect(aes(xmin = 6.2, xmax = 15, ymin = 0, ymax = 12.1), 
+#             fill = "#FFDC00") +
+#   geom_rect(aes(xmin = 6.2, xmax = 15, ymin = 12.2, ymax = 15), 
+#             fill = "#00204DFF") +
+#   annotate(geom = "text", y= 10, x = 2.4, label = "29", color = "white", fontface = 2, hjust= 0) +
+#   annotate(geom = "text", y= 2.3, x = 2.4, label = "15", color = "white", fontface = 2, hjust= 0) +
+#   annotate(geom = "text", y= 13.5, x = 9.8, label = "8", color = "white", fontface = 2, hjust= 0) +
+#   annotate(geom = "text", y= 6, x = 9.8, label = "63", color = "black", fontface = 2, hjust= 0) +
+#   annotate(geom = "text", y= 10, x = -3.5, label = "With", color = "black", fontface = 1, hjust= 0) +
+#   annotate(geom = "text", y= 2.5, x = -5.2, label = "Without", color = "black", fontface = 1, hjust= 0) +
+#   annotate(geom = "text", y= -1, x = 2, label = "With", color = "black", fontface = 1, hjust= 0) +
+#   annotate(geom = "text", y= -1, x = 8.5, label = "Without", color = "black", fontface = 1, hjust= 0) +
+#   theme_minimal() +
+#   theme(strip.background = element_rect(fill="#7C7B78FF"), line = element_blank(), 
+#         axis.text.y=element_blank(), axis.ticks.y=element_blank(), 
+#         axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+#   labs(title = "Confusion matrix", x= "Truth", y= "Prediction")
 ```
 
 ```{r}
-p12 + p13
+# p12 + p13
 ```
+
 ```{r}
 # indie_features %>%
 #   ggplot(aes(x = c02, y = c07, colour = playlist, size = tempo)) +
@@ -496,26 +497,31 @@ p12 + p13
 #   )
 ```
 
+![](forest-stats.png)
 
 ***
 
-Random forest is beast?
+As we have seen **the changes between the features** extracted from the Spotify API are **small but present**. However classifiers or clustering methods could be used to try and see if these changes are significant enough, such that a distinction can be made. If it is possible to find a method which is able to most of the time correctly predict to which cluster a track belongs too, then a definitive conclusion can be drawn.
 
-Before:
+By using all the features of the API, it was possible to try and find such a method. K-Nearest Neighbours (or knn), Decision Tree and Random Forest were all used to try and find the best possible classification/clustering. It was fairly obvious that **the best method was Random Forest**, although using kNN with a value of 7 or 15 for k both came close but still always performed worse. A **10-fold cross-validation** was applied to ensure accurate and representative findings. Cross-validation is a model validation technique for assessing how the results of a statistical analysis will generalize to an independent data set. By using the 10-fold data set and the features the following values were found for precision and recall:
 
 | Bizzey     | Precision     | Recall    |
 |------------|---------------|-----------|
 | With       | 0.7           | 0.471     |
 | Without    | 0.729         | 0.873     |
 
+_A precision recall table for both the time Bizzey was a member and when he wasn't. It was generated from the results of a Random Forest model using 10-fold cross-validation._
 
-After:
+These results were paired with an **accuracy of about 70%**. This might sound good but, as is clearly visible in the table, the recall for identifying a track as with Bizzey is quite low. A **low recall** means that there are quite some false negatives, in this case about 5 out of every 10 predictions for the group with. Precision is also not the best for both groups, as this means 3 out of 10 predictions is a false positive. Despite the high recall for the group without, this is not a model you would want to use. Therefore **a selection of the API features** was made to try and improve performance. This was done through process of elimination by eliminating first the Key features, as these were hardly influential, then the lowest five features and lowest five timbre components and finally the lowest feature was removed from which the following results ensued:
 
 | Bizzey     | Precision     | Recall    |
 |------------|---------------|-----------|
 | With       | 0.784         | 0.659     |
 | Without    | 0.808         | 0.887     |
 
+_A precision recall table with an optimized selection of the Spotify API features, for both the time Bizzey was a member and when he wasn't. It was generated from the results of a Random Forest model using 10-fold cross-validation._
+
+Now with an **accuracy of 80%**, way **higher precisions and recalls** it can be said a fairly decent model was build which is able to most of the time distinguish between the two groups. We can better see the results on the confusion matrix, which shows the distribution of predictions made by the model against the truth of the data. Next to it is a histogram showing the importance of the selected features used in the Random Forest. There are **5 major contributors** which always are **loudness, acousticness, tempo, c02 and c07**. Out of all these **Tempo is always the most important** for distinguishing the groups, this is not much to our surprise after our last tab. However acousticness and c07 are surprising since the difference in both was barely noticeable according to the previous tabs. 
 
 
 ### **This is Yellow '_M F _' Claw** {data-commentary-width=1100}
@@ -1049,7 +1055,7 @@ In this graph one can hardly distinguish between the two time era of Yellow Claw
 
 Yet again one can hardly distinguish between the two time era of Yellow Claw and only a few coefficients are slightly different after Bizzey left for example. These differences are also to small that no conclusions can be drawn from them. However one could argue there is **one difference**, namely **in the C pitch**. It is visible that the range, mean and deviation of this pitch are different after Bizzey left. 
 
-### **Selfreflection Too loud and slow** {data-commentary-width=800}
+### **Too loud and too slow** {data-commentary-width=800}
 
 ```{r}
 p8 <- YCData %>%
@@ -1118,6 +1124,4 @@ The loundess decreased after bizzey left.
 
 ### **A new Yellow Claw without Bizzey**
 
-Yes they have changed.
-
-404 Not found: Due to the research being incomplete we are not yet able to find an answer.
+Yes they have changed. 
