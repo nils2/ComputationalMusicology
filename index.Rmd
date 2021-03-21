@@ -29,7 +29,7 @@ output:
   line-height: 800%;
 }
 #dashboard-container .storyboard-nav .sbframelist li.active {
-  background-image: url("https://i1.sndcdn.com/avatars-000739128925-0ottgs-t500x500.jpg");
+  background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeogTuosI5yXKyOPpC-8I7go-3q1vxPjv0AA&usqp=CAU");
   background-size: 270px 120px;
   text-align: center;
 }
@@ -347,7 +347,7 @@ html_tag_audio <- function(file, type = c("mpeg")) {
 ```
 
 
-### *NEW * Data analitics {data-commentary-width=800}
+### *NEW * **Data analitics** {data-commentary-width=800}
 
 ```{r}
 befor <-
@@ -489,7 +489,7 @@ p12 + p13
 
 Random forest is beast?
 
-### This is Yellow '*M F *' Claw {data-commentary-width=1100}
+### **This is Yellow '_M F _' Claw** {data-commentary-width=1100}
 
 ![](https://i.scdn.co/image/ab67706f00000003f4c5d8831a7da0edad440464)
 
@@ -522,7 +522,7 @@ These are all tracks with a very different style then the other tracks made by Y
 
 The playlist that will be used can be found [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw).
 
-### To Bizzey or not to Bizzey? *A-side* {data-commentary-width=800}
+### **To Bizzey or not to Bizzey?** *A-side* {data-commentary-width=800}
 
 ```{r First Plot, echo=FALSE}
 p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness, 
@@ -555,7 +555,7 @@ ggplotly(p1, tooltip = "text") %>%
 
 This plot shows the **difference in speechiness and liveness** in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would **expect the departure of a MC to decrease the speechiness** of produced songs, but this is **not the case** here. One would expect it because rap music is indicated by Spotify to have a speechiness between 0.33 and 0.66. While values above 0.66 are indicated to describe tracks that are probably made entirely of spoken words, and values below 0.33 most likely represent music and other non-speech-like tracks. Therefore the low values are suprizing altogether but an MC, or rapper, leaving leading to an increase in the mean is at least to be called peculiar. One can also note an **increase in liveness** in songs after Bizzey left, whilst none of the songs are life performances. Eventhough none of the songs pass the 0.8 barrier set by Spotify to qualify as a live recording, but it can indicate a change to the music. This since clearly the algorithm notices something different to indicate the higher liveness.
 
-### To Bizzey or not to Bizzey? *B-side* {data-commentary-width=800}
+### **To Bizzey or not to Bizzey?** *B-side* {data-commentary-width=800}
 
 ```{r echo=FALSE}
 # Possible interesting comparisons
@@ -606,7 +606,7 @@ This plot shows the difference in acousticness and liveness in the time Bizzey w
 #            geom_segment(aes(xend = 0, yend = track.name), size = 2)
 ```
 
-### Looking at the *Loudest MF* {data-commentary-width=800}
+### **Looking at the** *Loudest MF* {data-commentary-width=800}
 
 ```{r}
 LMF <-
@@ -751,7 +751,7 @@ Then the rapper starts again as visible in the amount of present frequencies. At
 You can clearly see the most points mentioned above in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was not alot of repetition found by Spotify. 
 
 
-### Comparing with typical tracks {data-commentary-width=800}
+### **Comparing with typical tracks** {data-commentary-width=800}
 
 ```{r}
 bzt2 <-
@@ -893,7 +893,7 @@ _This is a 30 second sample from the track Amsterdamned._
 
 Both the timbre-based and chroma-based self-similarity matrices visualize a very repetitive track. It is visible that from 45 sec to 95 sec in the song the same occurs as from 125 sec to 175 sec. But also from 20 sec to 45 sec the track is repeated in 95 sec to 125 sec. This also coincides more with the typical yellow claw style of some repetition in their song, than was the case with Loudest MF.
 
-### What's the Key? {data-commentary-width=800}
+### **What's the Key?** {data-commentary-width=800}
 
 ```{r}
 YCData %>%
@@ -925,7 +925,7 @@ YCData %>%
 Spotify assigns each track a key that was mainly used according to their feature analysis. In this graph, one can see all the main keys of the tracks before and after Bizzey left the group. There clearly is a difference in the key use after Bizzey leaves. His departure brought way **more tracks in F** both major and minor, and **more tracks in C# major**. Also the graph is more shifted towards the A, A# and B this in the minor of those keys. Most tracks made with Bizzey are played in both G major and minor, however they are tied with a lot of other keys. One can also note how the G minor key is used less often after he left the group.
 
 
-### A shift in Style? {data-commentary-width=800}
+### **A shift in Style?** {data-commentary-width=800}
 
 ```{r}
 #YCData %>%
@@ -1013,7 +1013,7 @@ In this graph one can hardly distinguish between the two time era of Yellow Claw
 
 Yet again one can hardly distinguish between the two time era of Yellow Claw and only a few coefficients are slightly different after Bizzey left for example. These differences are also to small that no conclusions can be drawn from them. However one could argue there is **one difference**, namely **in the C pitch**. It is visible that the range, mean and deviation of this pitch are different after Bizzey left. 
 
-### Too loud and slow {data-commentary-width=800}
+### **Too loud and slow** {data-commentary-width=800}
 
 ```{r}
 p8 <- YCData %>%
@@ -1080,6 +1080,6 @@ After Bizzey left Yellow Claw had a significant shift in tempo distribution. Thi
 The loundess decreased after bizzey left. 
 
 
-### The answer
+### **The answer**
 
 404 Not found: Due to the research being incomplete we are not yet able to find an answer.
