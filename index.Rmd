@@ -33,6 +33,7 @@ output:
   background-size: 270px 120px;
   text-align: center;
 }
+
 </style>
 
 ```{r Load packages, message=FALSE, echo=FALSE}
@@ -333,23 +334,10 @@ key_templates <-
   )
 ```
 
-```{r}
-html_tag_audio <- function(file, type = c("mpeg")) {
-  type <- match.arg(type)
-  htmltools::tags$audio(
-    controls = NA,
-    htmltools::tags$source(
-      src = file,
-      type = glue::glue("audio/{type}", type = type)
-    )
-  )
-}
-```
 
+### **This is Yellow Claw** {data-commentary-width=1100}
 
-### **This is Yellow '_M F _' Claw** {data-commentary-width=1100}
-
-![](https://i.scdn.co/image/ab67706f00000003f4c5d8831a7da0edad440464)
+![Yellow Claw](https://i.scdn.co/image/ab67706f00000003f4c5d8831a7da0edad440464)
 
 ***
 
@@ -383,7 +371,9 @@ These are very typical as they define their past and current style in beat and b
   
 These are all tracks with a very different style then the other tracks made by <span style='color:#FFD200'><b>Yellow Claw</b></span>. 
 
-If you are interested you can check out their tracks right [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw). But for now let's try to discover if they have changed.
+If you are interested you can check out their tracks right [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw) or below. But for now let's try to discover if they have changed.
+
+<iframe src="https://open.spotify.com/embed/playlist/4ihYAvvARSvL4yUzdibPrd" width="250" height="330" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 ### **To Bizzey or not to Bizzey?** *A-side* {data-commentary-width=800}
 
@@ -416,9 +406,13 @@ ggplotly(p1, tooltip = "text") %>%
 
 ***
 
+_<span style='color:#7C7B78FF'>Data source: Spotify API</span>_
 
+*<span style='color:#7C7B78FF'>This plot shows the difference in speechiness and liveness in the time Bizzey was and wasn't part of the group. By hovering the plot one can explore the data depicted in the graphs.</span>*
 
-This plot shows the **difference in speechiness and liveness** in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would **expect the departure of a MC to decrease the speechiness** of produced songs, but this is **not the case** here. One would expect it because rap music is indicated by Spotify to have a speechiness between 0.33 and 0.66. While values above 0.66 are indicated to describe tracks that are probably made entirely of spoken words, and values below 0.33 most likely represent music and other non-speech-like tracks. Therefore the low values are suprizing altogether but an MC, or rapper, leaving leading to an increase in the mean is at least to be called peculiar. One can also note an **increase in liveness** in songs after Bizzey left, whilst none of the songs are life performances. Eventhough none of the songs pass the 0.8 barrier set by Spotify to qualify as a live recording, but it can indicate a change to the music. This since clearly the algorithm notices something different to indicate the higher liveness.
+**Speechiness distribution**
+
+One can clearly see that after Bizzey left the groep the speechiness contained more variety and got a higher mean. However it has to be noted that this is on a logarithmic scale, therefore it is not as significant as expected. Also the liveness became more apparent. It is strange to see a change in the speechiness since Bizzey was a MC. You would **expect the departure of a MC to decrease the speechiness** of produced songs, but this is **not the case** here. One would expect it because rap music is indicated by Spotify to have a speechiness between 0.33 and 0.66. While values above 0.66 are indicated to describe tracks that are probably made entirely of spoken words, and values below 0.33 most likely represent music and other non-speech-like tracks. Therefore the low values are to be expected but an MC, or rapper, leaving leading to an increase in the mean is at least to be called peculiar. One can also note an **increase in liveness** in songs after Bizzey left, whilst none of the songs are life performances. Eventhough none of the songs pass the 0.8 barrier set by Spotify to qualify as a live recording, it might indicate a change to the music. This since clearly the algorithm notices something different to indicate the higher liveness.
 
 ### **To Bizzey or not to Bizzey?** *B-side* {data-commentary-width=800}
 
@@ -459,19 +453,15 @@ ggplotly(p2, tooltip = "text") %>%
 
 ***
 
-This plot shows the difference in acousticness and liveness in the time Bizzey was and wasn't part of the group. One can clearly see that after Bizzey left the groep the acousticness contained more variety and got a higher mean. Also the liveness became more apparent. It is strange to see a change in the acousticness since Bizzey was a MC. You would expect the departure of a MC to decrease the acousticness of produced songs, but this is not the case here.
+_<span style='color:#7C7B78FF'>Data source: Spotify API</span>_
 
-```{r echo=FALSE}
+*<span style='color:#7C7B78FF'>This plot shows the difference in acousticness and liveness in the time Bizzey was and wasn't part of the group. By hovering the plot one can explore the data depicted in the graphs.</span>*
 
-#p3 <- ggplot(data = YCData %>%
-#               arrange(energy) %>%
-#             slice(1:5, (n()-4):n()),
-#             aes(x = energy, y = track.name, color = Label, shape = MadDecent)) +
-#            geom_point(size = 4) +
-#            geom_segment(aes(xend = 0, yend = track.name), size = 2)
-```
+**Acousticness distribution**
 
-### **Looking at the** *Loudest MF* {data-commentary-width=800}
+One can clearly see that after Bizzey left the group the acousticness contained more variety and got a higher mean. However yet again an logarithmic scale is applied, thus the **changes are smaller then they appear** to be. It is strange to see **a change in the acousticness** since Bizzey was a MC. Yet him leaving lead the group, some months later, to break the acousticness barrier of 0.1 a few times. This is an interesting find as this means they started using more acoustical instruments. When listening to some of the specific tracks that broke this barrier, such as 'Bittersweet' and 'Another Life', this more acoustical approach is very clear. Most songs above the barrier are songs a fan might qualify as atypical <span style='color:#FFD200'><b>Yellow Claw's</b></span> tracks, such as the aforementioned. However some, like 'Amsterdamned', are incorrectly identified by the API as having high acoustics. Still it is **clear they started applying more acoustics to the tracks** and adapted their style so it became more suited to fit the world wide audience they were attracting. 
+
+### **Looking at the** <span><b>*Loudest MF*</b></span> {data-commentary-width=800}
 
 ```{r}
 LMF <-
@@ -553,7 +543,7 @@ p9 <- LMF %>%
 ```{r}
 p3 <- bind_rows(
         bzt %>%
-          compmus_self_similarity(pitches, "manhattan") %>%
+          compmus_self_similarity(pitches, "euclidean") %>%
           mutate(d = d / max(d), type = "Chroma-based"),
         bzt %>%
           compmus_self_similarity(timbre, "euclidean") %>%
@@ -597,21 +587,25 @@ p9/p3
 
 ***
 
-Here we can see the chromagram and self-similarity matrices of [Loudest MF](https://open.spotify.com/track/34xsvZ1A2Ou1oo1VyOwQG1?si=5xdFXOTaSeWKOmF3pZgbwg), which scored very high on speechiness.
+_<span style='color:#7C7B78FF'>Data source: Spotify API</span>_
 
-```{r}
-html_tag_audio("https://p.scdn.co/mp3-preview/6a24bcc7c41cc0321640838661f735aa1242ba28?cid=774b29d4f13844c495f206cafdad9c86", type = "mpeg")
-```
-_This is a 30 second sample from the track Loudest MF._
+*<span style='color:#7C7B78FF'>Here we can see the chromagram and self-similarity matrices of [Loudest MF](https://open.spotify.com/track/34xsvZ1A2Ou1oo1VyOwQG1?si=5xdFXOTaSeWKOmF3pZgbwg), which scored very high on speechiness.</span>*
+
+<iframe src="https://open.spotify.com/embed/track/34xsvZ1A2Ou1oo1VyOwQG1" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+_<span style='color:#7C7B78FF'>This is a 30 second sample from the song itself</span>_
 
 **Chromagram**
+
+*<span style='color:#7C7B78FF'>A chromagram sums up all pitch coefficients that belong to the same chrome, and is cyclic in nature. Chebyshev was used to calculate and display these pitch coefficients.</span>*
 
 You can see the fade away of sound between 28 and 36 sec as only G# is present which is the muffled tone.
 After this it is clear that there is a distinct beat since it is visible in A/Ab and E/Eb and slightly in C#/C. This until around 50 sec where the rapper starts and the spectrum contains more yellow and thus there are more frequencies present until around 65 sec.
 You can see and hear at 85 sec the second beat drop, with a lot of clean notes being played until 115 sec. Also you can see at 105 sec is where the rapper says 'bounce' a couple of times as the C# is faded in the C. 
 Then the rapper starts again as visible in the amount of present frequencies. At 155 sec the third beat starts decently clean as most is present in G# but around 160 seconds muffled sound is added to the beat and the beat gets more components from then on. However it is still clear that the music fluctuates between high and low. 
 
-**Self-similarity matrices**
+**Self-similarity matrix**
+
+*<span style='color:#7C7B78FF'>A self-similarity matrix is used to compare each element of the feature sequence to all other elements. The main diagonal that is visible represents the comparison of an element with itself. Other diagonal paths represent exact repetitions, whereas block-like structures represent homogeneous regions. These regions is where features stay somewhat constant over the duration of the structure. The left matrix is labeled 'Chroma-based', and demonstrates at which points in the track the same pitches occur. Whereas the right matrix, labeled 'Timbre-based', demonstrates for the same song at which points in the track the same timbre or also known as tone color occur. Here euclidean was used to calculate the matrices.</span>*
 
 You can clearly see the most points mentioned above in the chroma-based self-similarity matrix. For example the high and low fluctuations of the same beat from 150 sec to the end of the song is depicted very clearly. However from both matrices it is clear there was not alot of repetition found by Spotify. 
 
@@ -663,7 +657,7 @@ bzt3 <-
 ```{r}
 p4 <- bind_rows(
         bzt2 %>%
-          compmus_self_similarity(pitches, "manhattan") %>%
+          compmus_self_similarity(pitches, "euclidean") %>%
           mutate(d = d / max(d), type = "Chroma-based"),
         bzt2 %>%
           compmus_self_similarity(timbre, "euclidean") %>%
@@ -698,7 +692,7 @@ p4 <- bind_rows(
 
 p5 <- bind_rows(
         bzt3 %>%
-          compmus_self_similarity(pitches, "manhattan") %>%
+          compmus_self_similarity(pitches, "euclidean") %>%
           mutate(d = d / max(d), type = "Chroma-based"),
         bzt3 %>%
           compmus_self_similarity(timbre, "euclidean") %>%
@@ -738,23 +732,23 @@ p4/p5
 
 ***
 
-Here two songs are compared to *Loudest MF*, namely [*DJ Turn It Up*](https://open.spotify.com/track/1ivuWgxFQb2xzxVNSlB1hF?si=bftjfytFSw2nOp4MqRPfgQ) and [*Amsterdamned*](https://open.spotify.com/track/5VkKghJxtZV1PHBSvmb2kw?si=Yv86SAoRRjWe6jHYJpscBQ). The first is a typical track that dates back to when Bizzey was still a member of <span style='color:#FFD200'><b>Yellow Claw</b></span>. Whilst the second is a typical track that was made without Bizzey.
+_<span style='color:#7C7B78FF'>Data source: Spotify API</span>_
+
+_<span style='color:#7C7B78FF'>Here two songs are compared to *Loudest MF*, namely [*DJ Turn It Up*](https://open.spotify.com/track/1ivuWgxFQb2xzxVNSlB1hF?si=bftjfytFSw2nOp4MqRPfgQ) and [*Amsterdamned*](https://open.spotify.com/track/5VkKghJxtZV1PHBSvmb2kw?si=Yv86SAoRRjWe6jHYJpscBQ). The first is a typical track that dates back to when Bizzey was still a member of </span><span style='color:#FFD200'><b>Yellow Claw</b></span><span style='color:#7C7B78FF'>. Whilst the second is a typical track that was made without Bizzey. All the self-similarity matrices where made with euclidean measures.</span>_
 
 **DJ Turn It Up**
 
-```{r}
-html_tag_audio("https://p.scdn.co/mp3-preview/6122811334f20e3ec60ecb213a03aafb482127f6?cid=774b29d4f13844c495f206cafdad9c86", type = "mpeg")
-```
-_This is a 30 second sample from the track DJ Turn It Up._
+<iframe src="https://open.spotify.com/embed/track/1ivuWgxFQb2xzxVNSlB1hF" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+
+_<span style='color:#7C7B78FF'>This is a 30 second sample from the song itself</span>_
 
 From the timbre-based self-similarity matrices a pattern of the song becomes clear. It is visible that from 20 sec to 95 sec in the song the same occurs as from 95 sec to 160 sec. This coincides more with the typical <span style='color:#FFD200'><b>Yellow Claw</b></span> style of some repetition in their song, than was the case with Loudest MF.
 
 **Amsterdamned**
 
-```{r}
-html_tag_audio("https://p.scdn.co/mp3-preview/b68e4d1b8f85514b6d9d1f47f67b85b6c1e78889?cid=774b29d4f13844c495f206cafdad9c86", type = "mpeg")
-```
-_This is a 30 second sample from the track Amsterdamned._
+<iframe src="https://open.spotify.com/embed/track/5VkKghJxtZV1PHBSvmb2kw" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+
+_<span style='color:#7C7B78FF'>This is a 30 second sample from the song itself</span>_
 
 Both the timbre-based and chroma-based self-similarity matrices visualize a very repetitive track. It is visible that from 45 sec to 95 sec in the song the same occurs as from 125 sec to 175 sec. But also from 20 sec to 45 sec the track is repeated in 95 sec to 125 sec. This also coincides more with the typical <span style='color:#FFD200'><b>Yellow Claw</b></span> style of some repetition in their song, than was the case with Loudest MF.
 
@@ -784,8 +778,9 @@ YCData %>%
   )
 ```
 
-
 ***
+
+_<span style='color:#7C7B78FF'>Data source: Spotify API</span>_
 
 Spotify assigns each track a key that was mainly used according to their feature analysis. In this graph, one can see all the main keys of the tracks before and after Bizzey left the group. There clearly is a difference in the key use after Bizzey leaves. His departure brought way **more tracks in F** both major and minor, and **more tracks in C# major**. Also the graph is more shifted towards the A, A# and B this in the minor of those keys. Most tracks made with Bizzey are played in both G major and minor, however they are tied with a lot of other keys. One can also note how the G minor key is used less often after he left the group.
 
@@ -868,7 +863,9 @@ p6 / p7
 
 ***
 
-*In this section two graphs are computed using lower-level track audio analysis from Spotify. The distinction is again made between the era where Bizzey was a member and the era where he wasn't. *
+_<span style='color:#7C7B78FF'>Data source: Spotify API</span>_
+
+*<span style='color:#7C7B78FF'>In this section two graphs are computed using lower-level track audio analysis from Spotify. The distinction is again made between the era where Bizzey was a member and the era where he wasn't.</span>*
 
 **Timbre coefficients**
 
@@ -894,7 +891,11 @@ p8 <- YCData %>%
         guides(color = FALSE, fill = FALSE) +
         labs(title = "Tempo distribution", y = "Tempo (BPM)", x = "Amount") +
         theme(axis.text.y=element_blank(), axis.ticks.y=element_blank(),
-              panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank())
+              panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank()) + 
+        geom_hline(yintercept = 150, linetype="twodash", 
+                      color = "#FFCC00", size=1) +
+        geom_hline(yintercept = 147.5, linetype="twodash", 
+                      color = "#7C7B78FF", size=1)
 ```
 
 ```{r}
@@ -911,7 +912,11 @@ p10 <- YCData %>%
         guides(color = FALSE, fill = FALSE) +
         labs(title = "Loudness distribution", y = "Loudness", x = "Amount") +
         theme(axis.title.y=element_blank(),axis.text.y=element_blank(), axis.ticks.y=element_blank(), 
-              panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank())
+              panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank()) +
+        geom_hline(yintercept = -4.825, linetype="twodash", 
+                      color = "#FFCC00", size=1) +
+        geom_hline(yintercept = -4, linetype="twodash", 
+                      color = "#7C7B78FF", size=1)
 ```
 
 ```{r}
@@ -933,11 +938,11 @@ p8 + p10
 
 ***
 
-_Both plots are distributed over the time period with and without Bizzey_
+_<span style='color:#7C7B78FF'>Data source: Spotify API</span>_
 
 **Tempo distribution**
 
-After Bizzey left <span style='color:#FFD200'><b>Yellow Claw</b></span> had a significant shift in tempo distribution. This is because as is visible in the graph tracks were made with tempo above the 150 bpm. And not just a few tracks, almost half of their new music would be above this previous apparent threshold. 
+After Bizzey left <span style='color:#FFD200'><b>Yellow Claw</b></span> had a significant shift in tempo distribution. It's apparent that both distributions are left skewed, however with more so then without. This is because as is visible in the graph tracks were made with tempo above the 150 bpm. And not just a few tracks, almost half of their new music would be above this previous apparent threshold. 
 
 
 **Loudness distribution**
@@ -1097,6 +1102,8 @@ The loundess decreased after bizzey left.
 
 ***
 
+_<span style='color:#7C7B78FF'>Data source: Spotify API</span>_
+
 As we have seen **the changes between the features** extracted from the Spotify API are **small but present**. However classifiers or clustering methods could be used to try and see if these changes are significant enough, such that a distinction can be made. If it is possible to find a method which is able to most of the time correctly predict to which cluster a track belongs too, then a definitive conclusion can be drawn.
 
 By using all the features of the API, it was possible to try and find such a method. K-Nearest Neighbours (or knn), Decision Tree and Random Forest were all used to try and find the best possible classification/clustering. It was fairly obvious that **the best method was Random Forest**, although using kNN with a value of 7 or 15 for k both came close but still always performed worse. A **10-fold cross-validation** was applied to ensure accurate and representative findings. Cross-validation is a model validation technique for assessing how the results of a statistical analysis will generalize to an independent data set. By using the 10-fold data set and the features the following values were found for precision and recall:
@@ -1106,7 +1113,7 @@ By using all the features of the API, it was possible to try and find such a met
 | With       | 0.7           | 0.471     |
 | Without    | 0.729         | 0.873     |
 
-_A precision recall table for both the time Bizzey was a member and when he wasn't. It was generated from the results of a Random Forest model using 10-fold cross-validation._
+_<span style='color:#7C7B78FF'>A precision recall table for both the time Bizzey was a member and when he wasn't. It was generated from the results of a Random Forest model using 10-fold cross-validation.</span>_
 
 These results were paired with an **accuracy of about 70%**. This might sound good but, as is clearly visible in the table, the recall for identifying a track as with Bizzey is quite low. A **low recall** means that there are quite some false negatives, in this case about 5 out of every 10 predictions for the group with. Precision is also not the best for both groups, as this means 3 out of 10 predictions is a false positive. Despite the high recall for the group without, this is not a model you would want to use. Therefore **a selection of the API features** was made to try and improve performance. This was done through process of elimination by eliminating first the Key features, as these were hardly influential, then the lowest five features and lowest five timbre components and finally the lowest feature was removed from which the following results ensued:
 
@@ -1115,10 +1122,14 @@ These results were paired with an **accuracy of about 70%**. This might sound go
 | With       | 0.784         | 0.659     |
 | Without    | 0.808         | 0.887     |
 
-_A precision recall table with an optimized selection of the Spotify API features, for both the time Bizzey was a member and when he wasn't. It was generated from the results of a Random Forest model using 10-fold cross-validation._
+_<span style='color:#7C7B78FF'>A precision recall table with an optimized selection of the Spotify API features, for both the time Bizzey was a member and when he wasn't. It was generated from the results of a Random Forest model using 10-fold cross-validation.</span>_
 
 Now with an **accuracy of 80%**, way **higher precisions and recalls** it can be said a fairly decent model was build which is able to most of the time distinguish between the two groups. We can better see the results on the confusion matrix, which shows the distribution of predictions made by the model against the truth of the data. Next to it is a histogram showing the importance of the selected features used in the Random Forest. There are **5 major contributors** which always are **loudness, acousticness, tempo, c02 and c07**. Out of all these **Tempo is always the most important** for distinguishing the groups, this is not much to our surprise after our last tab. However acousticness and c07 are surprising since the difference in both was barely noticeable according to the previous tabs. 
 
-### **A new Yellow Claw without Bizzey**
+### **A new Yellow Claw without Bizzey?!** {data-commentary-width=800}
+
+![A 2 man Yellow Claw](https://partyflock.nl/images/artist/61837_2048x1438_434341/Yellow-Claw.webp)
+
+***
 
 Yes they have changed. 
