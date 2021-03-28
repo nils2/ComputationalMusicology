@@ -371,13 +371,12 @@ These are very typical as they define their past and current style in beat and b
   
 These are all tracks with a very different style then the other tracks made by <span style='color:#FFD200'><b>Yellow Claw</b></span>. 
 
-If you are interested you can check out their tracks right [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw) or below. But for now let's try to discover if they have changed.
+If you are interested you can check out their tracks right [here](https://open.spotify.com/playlist/4ihYAvvARSvL4yUzdibPrd?si=smVI-XMlRRiikn2SXwt1sw). But for now let's try to discover if they have changed.
 
-<iframe src="https://open.spotify.com/embed/playlist/4ihYAvvARSvL4yUzdibPrd" width="250" height="330" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 ### **To Bizzey or not to Bizzey?** *A-side* {data-commentary-width=800}
 
-```{r First Plot, echo=FALSE}
+```{r First Plot, echo=FALSE, fig.width=11,fig.height=11}
 p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness, 
                       text = paste("Name:", track.name, "\n", "Label:", Label, "\n",
                                   "Speechiness:", speechiness, "\n",
@@ -416,7 +415,7 @@ One can clearly see that after Bizzey left the groep the speechiness contained m
 
 ### **To Bizzey or not to Bizzey?** *B-side* {data-commentary-width=800}
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.width=11,fig.height=11}
 # Possible interesting comparisons
 # year/instrumentalness
 # energy/loudness
