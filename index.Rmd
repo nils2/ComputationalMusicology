@@ -376,7 +376,7 @@ If you are interested you can check out their tracks right [here](https://open.s
 
 ### **To Bizzey or not to Bizzey?** *A-side* {data-commentary-width=800}
 
-```{r First Plot, echo=FALSE, fig.width=11,fig.height=11}
+```{r First Plot, echo=FALSE, fig.width=12,fig.height=11}
 p1 <- YCData %>% ggplot(aes(year, speechiness, color = Label, size = liveness, 
                       text = paste("Name:", track.name, "\n", "Label:", Label, "\n",
                                   "Speechiness:", speechiness, "\n",
@@ -415,7 +415,7 @@ One can clearly see that after Bizzey left the groep the speechiness contained m
 
 ### **To Bizzey or not to Bizzey?** *B-side* {data-commentary-width=800}
 
-```{r echo=FALSE, fig.width=11,fig.height=11}
+```{r echo=FALSE, fig.width=12,fig.height=11}
 # Possible interesting comparisons
 # year/instrumentalness
 # energy/loudness
